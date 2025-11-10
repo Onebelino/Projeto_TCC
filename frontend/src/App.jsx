@@ -8,9 +8,12 @@ import { AuthProvider } from './context/AuthContext.jsx';
 function App() {
   return (
     // 2. O AuthProvider "envelopa" o seu site AQUI
-    // Isso quebra o paradoxo e corrige o erro
+    // Isso conserta o erro "useNavigate() may be used only in the context of a <Router>"
+    // e corrige a tela branca.
     <AuthProvider>
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      {/* Adicionamos o fundo "dark mode" aqui para o site todo */}
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#111827' /* bg-gray-900 */ }}>
+        
         {/* Navbar no topo */}
         <Navbar />
 

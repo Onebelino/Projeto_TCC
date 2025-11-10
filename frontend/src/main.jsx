@@ -1,3 +1,5 @@
+
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
@@ -13,10 +15,12 @@ import HomePage from './pages/HomePage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import CreatePoolPage from './pages/CreatePoolPage.jsx';
-
-// 4. Importar o Protetor de Rotas
-import LocadorRoute from './components/LocadorRoute.jsx';
 import LocadorDashboardPage from './pages/LocadorDashboardPage.jsx';
+import MyReservationsPage from './pages/MyReservationsPage.jsx'; // A página do Locatário
+
+// 4. Importar os Protetores de Rota
+import ProtectedRoute from './components/ProtectedRoute.jsx'; // O "Segurança" GERAL
+import LocadorRoute from './components/LocadorRoute.jsx'; // O "Segurança" do Locador
 
 // 5. Definir a estrutura de rotas
 const router = createBrowserRouter([
@@ -24,6 +28,7 @@ const router = createBrowserRouter([
     path: '/',
     element: <App />, // O "Layout"
     children: [ 
+      // --- Rotas Públicas ---
       {
         index: true, 
         element: <HomePage />,
@@ -37,9 +42,20 @@ const router = createBrowserRouter([
         element: <RegisterPage />,
       },
       
-      // Rota Protegida de Locador
+      // --- Rotas Protegidas (Precisa estar logado - ex: Locatário) ---
       {
-        element: <LocadorRoute />, 
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: 'minhas-reservas', // A NOVA PÁGINA DO LOCATÁRIO
+            element: <MyReservationsPage />,
+          }
+        ]
+      },
+
+      // --- Rota Protegida de Locador (Precisa ser Locador) ---
+      {
+        element: <LocadorRoute />,
         children: [
           {
             path: 'nova-piscina', 

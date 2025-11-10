@@ -1,5 +1,3 @@
-// src/components/Navbar.jsx
-
 import { Link } from 'react-router-dom';
 import { useContext } from 'react';
 import AuthContext from '../context/AuthContext.jsx';
@@ -22,12 +20,13 @@ function Navbar() {
           {/* SE 'user' existir (está logado): */}
           {user ? (
             <>
-              {/* --- ✅ LÓGICA ATUALIZADA AQUI --- */}
+              {/* --- LÓGICA ATUALIZADA AQUI --- */}
+              
               {/* Mostra links SÓ se for LOCADOR */}
               {user.profile_tipo === 'LOCADOR' && (
                 <>
                   <Link 
-                    to="/dashboard" // O NOVO LINK
+                    to="/dashboard"
                     className="font-medium hover:text-cyan-400 transition-colors"
                   >
                     Meu Painel
@@ -41,12 +40,22 @@ function Navbar() {
                 </>
               )}
 
-              {/* Olá, Usuário */}
+              {/* ✅ Mostra link SÓ se for LOCATÁRIO */}
+              {user.profile_tipo === 'LOCATARIO' && (
+                <Link 
+                  to="/minhas-reservas" 
+                  className="font-medium hover:text-cyan-400 transition-colors"
+                >
+                  Minhas Reservas
+                </Link>
+              )}
+
+              {/* Olá, Usuário (Aparece para ambos) */}
               <span className="text-gray-400">
                 Olá, {user.username}!
               </span>
 
-              {/* Botão de Logout */}
+              {/* Botão de Logout (Aparece para ambos) */}
               <button 
                 onClick={logoutUser} 
                 className="bg-cyan-500 text-slate-900 font-bold py-2 px-4 rounded-lg hover:bg-cyan-400 transition-colors shadow-md"
