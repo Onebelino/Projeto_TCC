@@ -7,14 +7,17 @@ import { useNavigate } from 'react-router-dom';
 function CreatePool() {
   const navigate = useNavigate(); 
 
+  // --- MUDANÇA AQUI ---
+  // O estado 'imagem' agora é 'imagens' (plural) e é um array de arquivos
   const [poolData, setPoolData] = useState({
     titulo: '',
     descricao: '',
     cidade: '',
     endereco: '',
     preco_diaria: '100.00',
-    imagem: null, 
   });
+  const [imagens, setImagens] = useState([]); // <-- Novo estado para os arquivos
+  // --------------------
 
   // Lida com inputs de texto e números
   const handlePoolChange = (e) => {
@@ -24,13 +27,13 @@ function CreatePool() {
     });
   };
 
-  // Lida especificamente com o input de arquivo
+  // --- MUDANÇA AQUI ---
+  // Lida com o input de MÚLTIPLOS arquivos
   const handleImageChange = (e) => {
-    setPoolData({
-      ...poolData,
-      imagem: e.target.files[0], // Pega o primeiro arquivo selecionado
-    });
+    // e.target.files é uma FileList, não um array. Convertemos para array.
+    setImagens(Array.from(e.target.files)); 
   };
+  // --------------------
 
   const handlePoolSubmit = async (e) => {
     e.preventDefault();
@@ -41,21 +44,26 @@ function CreatePool() {
       return;
     }
 
-    // FormData é necessário para enviar arquivos (imagem)
     const formData = new FormData();
+    
+    // 1. Adiciona os dados de TEXTO (do poolData)
     for (const key in poolData) {
-      if (key === 'imagem' && poolData[key]) {
-        formData.append(key, poolData[key]);
-      } 
-      else if (key !== 'imagem') { 
-        formData.append(key, poolData[key]);
-      }
+      formData.append(key, poolData[key]);
     }
+    
+    // --- MUDANÇA AQUI ---
+    // 2. Adiciona os arquivos de IMAGEM
+    // O backend (serializers.ListField) espera 'upload_imagens'
+    if (imagens.length > 0) {
+      imagens.forEach((imagem) => {
+        formData.append('upload_imagens', imagem);
+      });
+    }
+    // --------------------
 
     try {
       const headers = { 
         'Authorization': `Bearer ${token}`,
-        // Não defina o 'Content-Type', o axios faz isso por nós com o FormData
       };
       
       await axios.post(
@@ -65,8 +73,7 @@ function CreatePool() {
       );
 
       alert('Piscina cadastrada com sucesso!');
-      setPoolData({ titulo: '', descricao: '', cidade: '', endereco: '', preco_diaria: '100.00', imagem: null });
-      navigate('/'); 
+      navigate('/'); // Redireciona para a Home
 
     } catch (error) {
       if (error.response && error.response.status === 403) {
@@ -75,20 +82,17 @@ function CreatePool() {
         alert('Erro: Seu token é inválido ou expirou. Faça login novamente.');
       } else {
         alert('Erro ao cadastrar piscina.');
-        // Isso vai nos mostrar o erro 400 (validação) se ele ainda acontecer
         console.error('Erro ao criar piscina:', error.response?.data || error.message);
       }
     }
   };
 
-  // --- O FORMULÁRIO (JJSX) ---
-  // Agora com todos os campos de volta!
   return (
     <div className="bg-slate-800 p-8 rounded-lg shadow-lg w-full max-w-md">
       <h2 className="text-2xl font-bold text-white mb-6 text-center">Adicionar Nova Piscina</h2>
       <form onSubmit={handlePoolSubmit} className="space-y-4">
         
-        {/* --- OS CAMPOS QUE FALTAVAM --- */}
+        {/* --- CAMPOS DE TEXTO (sem mudança) --- */}
         <div>
           <label className="block text-sm font-medium text-gray-300">Título do Anúncio:</label>
           <input
@@ -131,8 +135,6 @@ function CreatePool() {
             className="w-full p-2 mt-1 rounded bg-slate-700 text-white border border-slate-600 focus:ring-cyan-500 focus:border-cyan-500"
           />
         </div>
-        {/* ----------------------------- */}
-
         <div>
           <label className="block text-sm font-medium text-gray-300">Preço por Dia (R$):</label>
           <input
@@ -146,17 +148,21 @@ function CreatePool() {
             min="0.00"
           />
         </div>
+        {/* ----------------------------- */}
 
+        {/* --- ✅ CAMPO DE FOTOS (ATUALIZADO) --- */}
         <div>
-          <label className="block text-sm font-medium text-gray-300">Foto Principal (Opcional):</label>
+          <label className="block text-sm font-medium text-gray-300">Fotos da Piscina (Múltiplas):</label>
           <input
             type="file"
-            name="imagem"
+            name="upload_imagens"
             accept="image/*" 
-            onChange={handleImageChange} 
+            onChange={handleImageChange} // <-- Usa a nova função
+            multiple // <-- Permite selecionar vários arquivos
             className="w-full p-2 mt-1 rounded bg-slate-700 text-white border border-slate-600 focus:ring-cyan-500 focus:border-cyan-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cyan-500 file:text-slate-900 hover:file:bg-cyan-400"
           />
         </div>
+        {/* ----------------------------- */}
         
         <button 
           type="submit"

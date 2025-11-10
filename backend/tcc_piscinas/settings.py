@@ -150,3 +150,8 @@ REST_FRAMEWORK = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+AUTHENTICATION_BACKENDS = [
+    'usuarios.backends.EmailAuthBackend', # <-- Nosso novo autenticador
+    'django.contrib.auth.backends.ModelBackend', # O autenticador padrão (backup)
+]

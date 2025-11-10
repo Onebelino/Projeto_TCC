@@ -1,9 +1,14 @@
-# piscinas/urls.py
-
 from django.urls import path
-from .views import PiscinaListCreateView
+# --- ✅ Imports atualizados ---
+from .views import PiscinaListCreateView, PiscinaRetrieveView
 
 urlpatterns = [
-    # Esta URL vai ser /api/piscinas/
+    # Esta rota já existia (GET para listar, POST para criar)
+    # /api/piscinas/
     path('piscinas/', PiscinaListCreateView.as_view(), name='piscina-list-create'),
+
+    # --- ✅ ADICIONE ESTA NOVA ROTA NO FINAL ---
+    # Esta rota é para ver os detalhes de UMA piscina
+    # ex: /api/piscinas/7/
+    path('piscinas/<int:pk>/', PiscinaRetrieveView.as_view(), name='piscina-detail'),
 ]

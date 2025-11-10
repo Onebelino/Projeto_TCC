@@ -1,32 +1,28 @@
-
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css';
 
-// 1. NÃO importamos mais o AuthProvider aqui
+import { AuthProvider } from './context/AuthContext.jsx';
 
-// 2. Importar o Layout (App)
+// Layout e Páginas
 import App from './App.jsx';
-
-// 3. Importar as Páginas
 import HomePage from './pages/HomePage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import CreatePoolPage from './pages/CreatePoolPage.jsx';
 import LocadorDashboardPage from './pages/LocadorDashboardPage.jsx';
-import MyReservationsPage from './pages/MyReservationsPage.jsx'; // A página do Locatário
+import MyReservationsPage from './pages/MyReservationsPage.jsx';
+import PoolDetailPage from './pages/PoolDetailPage.jsx'; // <-- ✅ NOVO IMPORT
 
-// 4. Importar os Protetores de Rota
-import ProtectedRoute from './components/ProtectedRoute.jsx'; // O "Segurança" GERAL
-import LocadorRoute from './components/LocadorRoute.jsx'; // O "Segurança" do Locador
+// Protetores de Rota
+import LocatarioRoute from './components/LocatarioRoute.jsx';
+import LocadorRoute from './components/LocadorRoute.jsx'; 
 
-// 5. Definir a estrutura de rotas
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />, // O "Layout"
+    element: <App />, 
     children: [ 
       // --- Rotas Públicas ---
       {
@@ -41,19 +37,23 @@ const router = createBrowserRouter([
         path: 'register', 
         element: <RegisterPage />,
       },
-      
-      // --- Rotas Protegidas (Precisa estar logado - ex: Locatário) ---
       {
-        element: <ProtectedRoute />,
+        path: 'piscinas/:id', // <-- ✅ NOVA ROTA PÚBLICA
+        element: <PoolDetailPage />,
+      },
+      
+      // --- Rota Protegida de LOCATÁRIO ---
+      {
+        element: <LocatarioRoute />, 
         children: [
           {
-            path: 'minhas-reservas', // A NOVA PÁGINA DO LOCATÁRIO
+            path: 'minhas-reservas', 
             element: <MyReservationsPage />,
           }
         ]
       },
 
-      // --- Rota Protegida de Locador (Precisa ser Locador) ---
+      // --- Rota Protegida de LOCADOR ---
       {
         element: <LocadorRoute />,
         children: [
@@ -71,10 +71,11 @@ const router = createBrowserRouter([
   },
 ]);
 
-// 6. Renderizar o aplicativo (AGORA SEM O AUTHPROVIDER)
+// Renderiza o App
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    {/* O AuthProvider foi REMOVIDO daqui */}
-    <RouterProvider router={router} />
+
+      <RouterProvider router={router} />
+
   </React.StrictMode>,
 );

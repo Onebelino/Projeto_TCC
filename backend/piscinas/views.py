@@ -1,32 +1,41 @@
-# piscinas/views.py
-
 from rest_framework import generics, permissions
 from .models import Piscina
 from .serializers import PiscinaSerializer
+from rest_framework.parsers import MultiPartParser, FormParser # <-- ✅ 1. Importe os Parsers
 
-# Vamos criar uma "permissão" customizada
-# para checar se o usuário é um LOCADOR
+# --- Permissão (que já tínhamos) ---
 class IsLocador(permissions.BasePermission):
     def has_permission(self, request, view):
-        # O usuário está logado E o tipo do perfil dele é LOCADOR?
         return request.user.is_authenticated and request.user.profile.tipo == 'LOCADOR'
 
-# API para LISTAR todas as piscinas (GET) e CRIAR uma nova (POST)
+# --- View de Lista/Criação (ATUALIZADA) ---
 class PiscinaListCreateView(generics.ListCreateAPIView):
     queryset = Piscina.objects.all()
     serializer_class = PiscinaSerializer
-    filterset_fields = ['cidade']
+    
+    # --- ✅ 2. ADICIONE OS PARSERS ---
+    # Diz ao Django para esperar 'multipart/form-data' (dados de formulário + arquivos)
+    parser_classes = [MultiPartParser, FormParser]
+
+    # Filtro (que já tínhamos)
+    filterset_fields = ['cidade'] 
     
     def get_permissions(self):
-        # Se o método for GET (listar), qualquer um pode ver (AllowAny)
         if self.request.method == 'GET':
             return [permissions.AllowAny()]
-        
-        # Se for POST (criar), exigimos que seja um LOCADOR (IsLocador)
         return [IsLocador()]
 
-    # Este método é chamado QUANDO uma piscina está sendo CRIADA
     def perform_create(self, serializer):
-        # Salvamos a piscina associando o 'dono' 
-        # ao perfil do usuário que está logado (request.user.profile)
+        # A lógica de salvar as imagens agora está no Serializer (create)
+        # Então, só precisamos salvar o 'dono' aqui
         serializer.save(dono=self.request.user.profile)
+
+
+# --- View de Detalhes (sem mudança) ---
+class PiscinaRetrieveView(generics.RetrieveAPIView):
+    """
+    API para buscar (GET) os detalhes de UMA piscina específica.
+    """
+    queryset = Piscina.objects.all()
+    serializer_class = PiscinaSerializer
+    permission_classes = [permissions.AllowAny]

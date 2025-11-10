@@ -1,8 +1,7 @@
 // src/components/Register.jsx
 
-import { useState, useContext } from 'react'; // Importe o useContext
+import { useState } from 'react';
 import axios from 'axios';
-import AuthContext from '../context/AuthContext'; // Importe o Contexto
 import { useNavigate } from 'react-router-dom';
 
 function Register() {
@@ -12,12 +11,12 @@ function Register() {
     password: '',
     password2: '',
     tipo: 'LOCATARIO',
-    telefone: '', // Campo para o telefone
-    cpf: '',      // Campo para o cpf
+    telefone: '', 
+    cpf: '',
+    nome_completo: '', // <-- ✅ NOVO ESTADO
+    data_nascimento: '', // <-- ✅ NOVO ESTADO
   });
   
-  // (Nós não usamos o loginUser aqui, então podemos remover)
-  // const { loginUser } = useContext(AuthContext); 
   const navigate = useNavigate();
 
   const handleRegisterChange = (e) => {
@@ -42,17 +41,16 @@ function Register() {
       password2: registerData.password2,
     };
 
-    // 2. Preparar os dados do perfil
+    // 2. Preparar os dados do perfil (com os novos campos)
     const dadosParaApi = {
       tipo: registerData.tipo,
       user: dadosUser,
-      telefone: registerData.telefone, // Envia o telefone
-      cpf: registerData.cpf,          // Envia o cpf
+      telefone: registerData.telefone,
+      cpf: registerData.cpf,
+      nome_completo: registerData.nome_completo, // <-- ✅ NOVO
+      data_nascimento: registerData.data_nascimento, // <-- ✅ NOVO
     };
     
-    // 3. REMOVEMOS A LÓGICA DE 'DELETE' DAQUI
-    // (Esta era a causa provável do bug)
-
     try {
       await axios.post('http://127.0.0.1:8000/api/register/', dadosParaApi);
       alert('Usuário criado com sucesso! Por favor, faça o login.');
@@ -62,24 +60,45 @@ function Register() {
       if (error.response) {
         console.error('Erro do servidor:', error.response.data);
         alert('Erro ao registrar: ' + JSON.stringify(error.response.data));
-      } else if (error.request) {
-        console.error('Erro de rede:', error.message);
-        alert('Erro de conexão: O servidor do backend não está respondendo!');
       } else {
-        console.error('Erro:', error.message);
-        alert('Erro: ' + error.message);
+        alert('Erro ao registrar.');
       }
     }
   };
 
+  // --- ✅ JSX ATUALIZADO COM ESTILOS E NOVOS CAMPOS ---
   return (
     <div className="bg-slate-800 p-8 rounded-lg shadow-lg w-full max-w-md">
       <h1 className="text-2xl font-bold text-white mb-6 text-center">Crie sua Conta</h1>
       <form onSubmit={handleRegisterSubmit} className="space-y-4">
         
-        {/* Campo Username */}
+        {/* --- ✅ NOVOS CAMPOS --- */}
         <div>
-          <label className="block text-sm font-medium text-gray-300">Nome de Usuário:</label>
+          <label className="block text-sm font-medium text-gray-300">Nome Completo:</label>
+          <input
+            type="text"
+            name="nome_completo"
+            value={registerData.nome_completo}
+            onChange={handleRegisterChange}
+            required
+            className="w-full p-2 mt-1 rounded bg-slate-700 text-white border border-slate-600 focus:ring-cyan-500 focus:border-cyan-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-300">Data de Nascimento:</label>
+          <input
+            type="date" // <-- Input de data
+            name="data_nascimento"
+            value={registerData.data_nascimento}
+            onChange={handleRegisterChange}
+            required
+            className="w-full p-2 mt-1 rounded bg-slate-700 text-white border border-slate-600 focus:ring-cyan-500 focus:border-cyan-500"
+          />
+        </div>
+        {/* -------------------- */}
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-300">Nome de Usuário (Apelido):</label>
           <input
             type="text"
             name="username"
@@ -90,7 +109,6 @@ function Register() {
           />
         </div>
 
-        {/* Campo Email */}
         <div>
           <label className="block text-sm font-medium text-gray-300">Email:</label>
           <input
@@ -103,7 +121,7 @@ function Register() {
           />
         </div>
 
-        {/* Campo Senha */}
+        {/* ... (Campos de Senha e Confirmação de Senha) ... */}
         <div>
           <label className="block text-sm font-medium text-gray-300">Senha:</label>
           <input
@@ -115,8 +133,6 @@ function Register() {
             className="w-full p-2 mt-1 rounded bg-slate-700 text-white border border-slate-600 focus:ring-cyan-500 focus:border-cyan-500"
           />
         </div>
-
-        {/* Campo Confirmar Senha */}
         <div>
           <label className="block text-sm font-medium text-gray-300">Confirme a Senha:</label>
           <input
@@ -128,38 +144,9 @@ function Register() {
             className="w-full p-2 mt-1 rounded bg-slate-700 text-white border border-slate-600 focus:ring-cyan-500 focus:border-cyan-500"
           />
         </div>
-
-        {/* Campos Telefone e CPF */}
+        
         <div>
-          <label className="block text-sm font-medium text-gray-300">Telefone (com DDD):</label>
-          <input
-            type="text"
-            name="telefone"
-            placeholder="(11) 91234-5678"
-            value={registerData.telefone}
-            onChange={handleRegisterChange}
-            // (Obrigatório apenas se for locador)
-            required={registerData.tipo === 'LOCADOR'} 
-            className="w-full p-2 mt-1 rounded bg-slate-700 text-white border border-slate-600 focus:ring-cyan-500 focus:border-cyan-500"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-300">CPF:</label>
-          <input
-            type="text"
-            name="cpf"
-            placeholder="123.456.789-00"
-            value={registerData.cpf}
-            onChange={handleRegisterChange}
-            // (Obrigatório apenas se for locador)
-            required={registerData.tipo === 'LOCADOR'}
-            className="w-full p-2 mt-1 rounded bg-slate-700 text-white border border-slate-600 focus:ring-cyan-500 focus:border-cyan-500"
-          />
-        </div>
-
-        {/* Campo Tipo de Usuário */}
-        <div>
-          <label className="block text-sm font-medium text-gray-300">Eu sou:</label>
+          <label className="block text-sm font-medium text-gray-300">Tipo de Conta:</label>
           <select 
             name="tipo" 
             value={registerData.tipo} 
@@ -170,6 +157,36 @@ function Register() {
             <option value="LOCADOR">Locador (Quero anunciar)</option>
           </select>
         </div>
+        
+        {/* Mostra os campos de CPF e Telefone SÓ se for Locador */}
+        {registerData.tipo === 'LOCADOR' && (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-300">Telefone (com DDD):</label>
+              <input
+                type="text"
+                name="telefone"
+                placeholder="(11) 91234-5678"
+                value={registerData.telefone}
+                onChange={handleRegisterChange}
+                required={registerData.tipo === 'LOCADOR'} 
+                className="w-full p-2 mt-1 rounded bg-slate-700 text-white border border-slate-600 focus:ring-cyan-500 focus:border-cyan-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300">CPF:</label>
+              <input
+                type="text"
+                name="cpf"
+                placeholder="123.456.789-00"
+                value={registerData.cpf}
+                onChange={handleRegisterChange}
+                required={registerData.tipo === 'LOCADOR'}
+                className="w-full p-2 mt-1 rounded bg-slate-700 text-white border border-slate-600 focus:ring-cyan-500 focus:border-cyan-500"
+              />
+            </div>
+          </>
+        )}
         
         <button 
           type="submit"
