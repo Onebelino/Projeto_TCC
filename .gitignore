@@ -1,0 +1,137 @@
+# ======================================
+# 🔧 GERAL
+# ======================================
+# Dependências e builds
+node_modules/
+dist/
+build/
+out/
+.cache/
+.vite/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Variáveis de ambiente
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ======================================
+# 🐍 PYTHON
+# ======================================
+# Compilados
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Build e distribuição
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual env
+venv/
+env/
+ENV/
+.venv/
+.pyenv/
+pip-wheel-metadata/
+pip-log.txt
+
+# Testes e cache
+.coverage
+.tox/
+.nox/
+.pytest_cache/
+.cache/
+htmlcov/
+.mypy_cache/
+.dmypy.json
+.pyre/
+
+# Banco de dados local
+*.db
+*.sqlite3
+
+# ======================================
+# ⚛️ REACT + VITE + TAILWIND
+# ======================================
+# Dependências
+node_modules/
+
+# Compilação e cache
+dist/
+build/
+out/
+.vite/
+.vscode/
+.idea/
+
+# Arquivos temporários
+*.temp
+*.tmp
+*.swp
+*.swo
+*.bak
+*.old
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Relatórios e cobertura
+coverage/
+*.tsbuildinfo
+
+# ======================================
+# 🧠 Tailwind / PostCSS
+# ======================================
+# Cache gerado pelo Tailwind
+*.postcss-cache/
+.tailwind-cache/
+tailwind.config.backup.js
+
+# ======================================
+# 💾 SQLite e backups
+# ======================================
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# ======================================
+# 🧰 IDEs
+# ======================================
+.vscode/
+.idea/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+
+# ======================================
+# 🐳 Docker (caso use)
+# ======================================
+*.pid
+docker-compose.override.yml

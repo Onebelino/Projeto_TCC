@@ -1,0 +1,4 @@
+/* Isso "injeta" os estilos base do Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
