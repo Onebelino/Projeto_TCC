@@ -1,70 +1,79 @@
 // src/components/Navbar.jsx
 
 import { Link } from 'react-router-dom';
-import { useContext } from 'react'; // 1. Importe o 'useContext'
-// Corrigindo o caminho do import:
-import AuthContext from '../context/AuthContext.jsx'; // 2. Importe nosso Contexto
-
-// Estilos simples para a navbar
-const navStyle = {
-  display: 'flex',
-  justifyContent: 'space-around',
-  alignItems: 'center',
-  padding: '1rem',
-  background: '#f8f8f8',
-  borderBottom: '1px solid #ddd',
-  width: '100%',
-};
-
-const linkStyle = {
-  textDecoration: 'none',
-  color: '#333',
-  fontWeight: 'bold',
-  padding: '8px',
-};
+import { useContext } from 'react';
+import AuthContext from '../context/AuthContext.jsx';
 
 function Navbar() {
-  
-  // 3. "Escutamos" o Contexto para saber quem está logado
   const { user, logoutUser } = useContext(AuthContext);
 
   return (
-    <nav style={navStyle}>
-      <Link to="/" style={linkStyle}>
-        PiscinaFácil (Home)
-      </Link>
-      
-      <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+    <nav className="bg-slate-900 text-gray-200 shadow-lg">
+      <div className="container mx-auto flex justify-between items-center p-4">
         
-        {/* 4. É AQUI QUE A MÁGICA ACONTECE! */}
-        {/* Usamos um "operador ternário" (if/else) */}
+        {/* Logo/Home Link */}
+        <Link to="/" className="text-xl font-bold text-white hover:text-cyan-400 transition-colors">
+          PiscinaFácil
+        </Link>
+        
+        {/* Menu Links */}
+        <div className="flex items-center gap-4">
+          
+          {/* SE 'user' existir (está logado): */}
+          {user ? (
+            <>
+              {/* --- ✅ LÓGICA ATUALIZADA AQUI --- */}
+              {/* Mostra links SÓ se for LOCADOR */}
+              {user.profile_tipo === 'LOCADOR' && (
+                <>
+                  <Link 
+                    to="/dashboard" // O NOVO LINK
+                    className="font-medium hover:text-cyan-400 transition-colors"
+                  >
+                    Meu Painel
+                  </Link>
+                  <Link 
+                    to="/nova-piscina" 
+                    className="font-medium hover:text-cyan-400 transition-colors"
+                  >
+                    Cadastrar Piscina
+                  </Link>
+                </>
+              )}
 
-        {/* SE 'user' existir (está logado): */}
-        {user ? (
-          <>
-            <Link to="/nova-piscina" style={linkStyle}>
-              Cadastrar Piscina
-            </Link>
-            {/* O botão de Logout chama a função do nosso contexto */}
-            <button onClick={logoutUser} style={linkStyle}>
-              Sair (Logout)
-            </button>
-            {/* Mostra o nome do usuário logado */}
-            <span style={{ padding: '8px', color: '#555' }}>Olá, {user.username}!</span>
-          </>
-        ) : (
-        
-        /* SENÃO (NÃO está logado): */
-          <>
-            <Link to="/login" style={linkStyle}>
-              Login
-            </Link>
-            <Link to="/register" style={linkStyle}>
-              Registrar
-            </Link>
-          </>
-        )}
-        
+              {/* Olá, Usuário */}
+              <span className="text-gray-400">
+                Olá, {user.username}!
+              </span>
+
+              {/* Botão de Logout */}
+              <button 
+                onClick={logoutUser} 
+                className="bg-cyan-500 text-slate-900 font-bold py-2 px-4 rounded-lg hover:bg-cyan-400 transition-colors shadow-md"
+              >
+                Sair (Logout)
+              </button>
+            </>
+          ) : (
+          
+          /* SENÃO (NÃO está logado): */
+            <>
+              <Link 
+                to="/login" 
+                className="font-medium hover:text-cyan-400 transition-colors"
+              >
+                Login
+              </Link>
+              <Link 
+                to="/register" 
+                className="bg-cyan-500 text-slate-900 font-bold py-2 px-4 rounded-lg hover:bg-cyan-400 transition-colors shadow-md"
+              >
+                Registrar
+              </Link>
+            </>
+          )}
+          
+        </div>
       </div>
     </nav>
   );

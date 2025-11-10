@@ -1,5 +1,3 @@
-// src/main.jsx
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
@@ -17,10 +15,10 @@ import RegisterPage from './pages/RegisterPage.jsx';
 import CreatePoolPage from './pages/CreatePoolPage.jsx';
 
 // 4. Importar o Protetor de Rotas
-import ProtectedRoute from './components/ProtectedRoute.jsx';
+import LocadorRoute from './components/LocadorRoute.jsx';
+import LocadorDashboardPage from './pages/LocadorDashboardPage.jsx';
 
-
-// 5. Definir a estrutura de rotas (sem mudança aqui)
+// 5. Definir a estrutura de rotas
 const router = createBrowserRouter([
   {
     path: '/',
@@ -38,12 +36,18 @@ const router = createBrowserRouter([
         path: 'register', 
         element: <RegisterPage />,
       },
+      
+      // Rota Protegida de Locador
       {
-        element: <ProtectedRoute />, 
+        element: <LocadorRoute />, 
         children: [
           {
             path: 'nova-piscina', 
             element: <CreatePoolPage />, 
+          },
+          {
+            path: 'dashboard',
+            element: <LocadorDashboardPage />,
           }
         ]
       },

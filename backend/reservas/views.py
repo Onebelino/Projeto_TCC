@@ -1,30 +1,60 @@
 from rest_framework import generics, permissions
 from .models import Reserva
-from .serializers import ReservaSerializer
+# Imports atualizados:
+from .serializers import ReservaSerializer, ReservaStatusUpdateSerializer
+from .permissions import IsDonodaPiscinaDaReserva 
 
-# Esta View permite Criar (POST) e Listar (GET) reservas
+# --- A 'ReservaListCreateView' (que já fizemos) FICA AQUI ---
 class ReservaListCreateView(generics.ListCreateAPIView):
     """
-    API para criar uma nova reserva (POST) ou
-    listar as reservas do usuário logado (GET).
+    API para o Locatário criar (POST) ou
+    listar as SUAS reservas (GET).
     """
     serializer_class = ReservaSerializer
-    
-    # Apenas usuários logados podem ver ou criar reservas
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         """
-        Sobrescrevemos este método para garantir que o usuário (GET)
-        só veja as *suas próprias* reservas, e não as de todo mundo.
+        Mostra ao LOCATÁRIO apenas as *suas* reservas.
         """
-        # Filtra as reservas onde o 'locatario' é o perfil do usuário logado
         return Reserva.objects.filter(locatario=self.request.user.profile).order_by('-data_inicio')
 
     def perform_create(self, serializer):
         """
-        Sobrescrevemos este método (chamado durante o POST)
-        para definir o 'locatario' automaticamente.
-        O 'status' já é 'PENDENTE' por padrão (definido no models.py).
+        Define o 'locatario' da reserva como o usuário logado.
         """
         serializer.save(locatario=self.request.user.profile)
+
+
+# --- A 'ReservaManageView' (que já fizemos) FICA AQUI ---
+class ReservaManageView(generics.UpdateAPIView):
+    """
+    API para o Locador (Dono da Piscina) gerenciar uma reserva (Aceitar/Recusar).
+    Usa o método PATCH.
+    """
+    serializer_class = ReservaStatusUpdateSerializer
+    queryset = Reserva.objects.all()
+    
+    # Segurança: Precisa estar logado E ser o dono da piscina da reserva
+    permission_classes = [permissions.IsAuthenticated, IsDonodaPiscinaDaReserva]
+    
+
+# --- ✅ ADICIONE ESTA NOVA CLASSE NO FINAL DO ARQUIVO ---
+class LocadorReservasListView(generics.ListAPIView):
+    """
+    API para o Locador (Dono) ver TODAS as reservas
+    associadas às SUAS piscinas.
+    """
+    serializer_class = ReservaSerializer
+    permission_classes = [permissions.IsAuthenticated] # Só usuários logados
+
+    def get_queryset(self):
+        """
+        Sobrescrevemos este método para filtrar as reservas.
+        """
+        # 1. Pega o perfil do usuário logado (que é o Locador)
+        locador_profile = self.request.user.profile
+
+        # 2. Filtra as reservas onde a 'piscina' pertence (dono)
+        #    a este 'locador_profile'
+        return Reserva.objects.filter(piscina__dono=locador_profile).order_by('-criado_em')
