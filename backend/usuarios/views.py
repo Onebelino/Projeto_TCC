@@ -1,26 +1,50 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status # <-- 1. Adicione 'status'
+from .models import Profile
+from django.contrib.auth.models import User # <-- 1. Importe o User
+from rest_framework.response import Response # <-- 1. Importe a Response
+from rest_framework.views import APIView # <-- 1. Importe a APIView
 
-# --- ✅ 1. IMPORTAMOS O SERIALIZER CORRETO (DO ARQUIVO CERTO) ---
-# O 'MyTokenObtainPairSerializer' é importado do 'serializers.py'
-from .serializers import RegisterSerializer, MyTokenObtainPairSerializer
+# --- ✅ 1. IMPORTES ATUALIZADOS ---
+from .serializers import RegisterSerializer, MyTokenObtainPairSerializer, ProfileUpdateSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-# ---------------------------------------------------
+# ----------------------------------
 
-# --- ✅ 2. A VIEW DE LOGIN CUSTOMIZADA ---
-# Esta é a classe que o seu 'urls.py' está (corretamente) usando
+
+# --- View de Login Customizada (EXISTENTE) ---
 class MyTokenObtainPairView(TokenObtainPairView):
-    """
-    Esta View "diz" ao Django para usar o nosso Serializer customizado
-    (o que adiciona o 'display_name' e 'profile_tipo' ao token).
-    """
     serializer_class = MyTokenObtainPairSerializer
-# ---------------------------------------------------
 
-# --- Esta é a sua View de Registro (sem mudança) ---
+# --- View de Registro (EXISTENTE) ---
 class RegisterView(generics.CreateAPIView):
-    """
-    API para registrar novos usuários (Locadores ou Locatários).
-    """
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
-# ---------------------------------------------------
+
+
+# --- ✅ 2. ADICIONE ESTA NOVA CLASSE (Para GET e PATCH) ---
+class ProfileDetailView(generics.RetrieveUpdateAPIView):
+    """
+    API para o usuário logado ver (GET) e 
+    atualizar (PATCH) seu próprio perfil.
+    """
+    serializer_class = ProfileUpdateSerializer
+    permission_classes = [permissions.IsAuthenticated] # Só usuários logados
+
+    def get_object(self):
+        # Retorna o 'Profile' do usuário que está fazendo a requisição
+        return self.request.user.profile
+        
+# --- ✅ 3. ADICIONE ESTA NOVA CLASSE (Para DELETE) ---
+class UserDeleteView(APIView):
+    """
+    API para o usuário logado deletar sua própria conta (User e Profile).
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        user = self.request.user
+        # Deleta o 'User'. O 'Profile' será deletado em cascata
+        # (graças ao on_delete=models.CASCADE que definimos no models.py)
+        user.delete()
+        
+        # Retorna uma resposta de sucesso sem conteúdo
+        return Response(status=status.HTTP_204_NO_CONTENT)

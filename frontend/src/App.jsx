@@ -2,23 +2,21 @@
 
 import { Outlet } from 'react-router-dom';
 import Navbar from './components/Navbar';
-// 1. Importe o AuthProvider AQUI
 import { AuthProvider } from './context/AuthContext.jsx';
 
 function App() {
   return (
-    // 2. O AuthProvider "envelopa" o seu site AQUI
-    // Isso conserta o erro "useNavigate() may be used only in the context of a <Router>"
-    // e corrige a tela branca.
     <AuthProvider>
-      {/* Adicionamos o fundo "dark mode" aqui para o site todo */}
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#111827' /* bg-gray-900 */ }}>
+      {/* O 'div' principal SÓ controla o fundo e a altura */}
+      <div className="bg-slate-900 min-h-screen flex flex-col">
         
-        {/* Navbar no topo */}
         <Navbar />
 
-        {/* O "recheio" (página) */}
-        <main style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+        {/* --- ✅ A CORREÇÃO ESTÁ AQUI --- */}
+        {/* O 'main' agora NÃO centraliza. Ele só dá um padding
+            para o conteúdo não colar nas bordas da tela. */}
+        <main className="flex-grow container mx-auto p-4 md:p-8">
+        {/* --------------------------- */}
           <Outlet />
         </main>
 

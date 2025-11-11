@@ -1,11 +1,15 @@
 // src/pages/LoginPage.jsx
-// Esta página foca apenas no Login.
-import Login from '../components/Login.jsx'; // <-- CORREÇÃO: Adicionado .jsx
+import Login from '../components/Login.jsx';
 
 export default function LoginPage() {
+  
+  // --- ✅ A CORREÇÃO ESTÁ AQUI ---
+  // Este 'div' agora é o responsável por
+  // centralizar o formulário na tela.
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }}>
+    <div className="w-full flex-grow flex items-center justify-center">
       <Login />
     </div>
   );
+  // -----------------
 }

@@ -1,11 +1,13 @@
 // src/pages/RegisterPage.jsx
-// Esta página foca apenas no Registro.
-import Register from '../components/Register.jsx'; // <-- CORREÇÃO: Adicionado .jsx
+import Register from '../components/Register.jsx';
 
 export default function RegisterPage() {
+  
+  // --- ✅ A CORREÇÃO ESTÁ AQUI ---
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }}>
+    <div className="w-full flex-grow flex items-center justify-center">
       <Register />
     </div>
   );
+  // -----------------
 }

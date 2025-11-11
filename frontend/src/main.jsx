@@ -12,17 +12,18 @@ import App from './App.jsx';
 import HomePage from './pages/HomePage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
+import PoolDetailPage from './pages/PoolDetailPage.jsx';
+import MyReservationsPage from './pages/MyReservationsPage.jsx';
 import CreatePoolPage from './pages/CreatePoolPage.jsx';
 import LocadorDashboardPage from './pages/LocadorDashboardPage.jsx';
-import MyReservationsPage from './pages/MyReservationsPage.jsx';
-import PoolDetailPage from './pages/PoolDetailPage.jsx';
 import MyPoolsPage from './pages/MyPoolsPage.jsx';
 import EditPoolPage from './pages/EditPoolPage.jsx';
+import ProfilePage from './pages/ProfilePage.jsx'; // <-- ✅ NOVO IMPORT
 
-// --- Imports dos "Seguranças" ---
+// Protetores de Rota
 import ProtectedRoute from './components/ProtectedRoute.jsx'; // O "Segurança" GERAL
-import LocatarioRoute from './components/LocatarioRoute.jsx'; // O "Segurança" SÓ Locatário
-import LocadorRoute from './components/LocadorRoute.jsx';   // O "Segurança" SÓ Locador
+import LocatarioRoute from './components/LocatarioRoute.jsx';
+import LocadorRoute from './components/LocadorRoute.jsx'; 
 
 const router = createBrowserRouter([
   {
@@ -35,24 +36,26 @@ const router = createBrowserRouter([
       { path: 'register', element: <RegisterPage /> },
       { path: 'piscinas/:id', element: <PoolDetailPage /> },
       
-      // --- ✅ A CORREÇÃO ESTÁ AQUI ---
-      // Rota Protegida (GERAL - QUALQUER UM LOGADO)
+      // --- Rota Protegida (GERAL - QUALQUER UM LOGADO) ---
       {
-        element: <ProtectedRoute />, // <-- O "Segurança" GERAL
+        element: <ProtectedRoute />,
         children: [
           {
-            path: 'minhas-reservas', // <-- "Minhas Reservas" agora mora aqui!
+            path: 'perfil', // <-- ✅ NOVA ROTA
+            element: <ProfilePage />,
+          },
+          {
+            path: 'minhas-reservas', 
             element: <MyReservationsPage />,
           }
-          // (No futuro, "Editar Perfil" também iria aqui)
         ]
       },
-      
+
       // --- Rota Protegida de LOCATÁRIO (Se houver alguma) ---
       {
         element: <LocatarioRoute />, 
         children: [
-          // (Agora está vazia, o que é correto)
+          // (Vazia)
         ]
       },
 
@@ -73,8 +76,6 @@ const router = createBrowserRouter([
 // Renderiza o App
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-
       <RouterProvider router={router} />
-
   </React.StrictMode>,
 );

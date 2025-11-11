@@ -1,6 +1,9 @@
+// src/components/Login.jsx
+
 import { useState, useContext } from 'react'; 
 import axios from 'axios';
 import AuthContext from '../context/AuthContext.jsx'; 
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 function Login() {
   const [loginData, setLoginData] = useState({
@@ -8,6 +11,7 @@ function Login() {
     password: '',
   });
 
+  const [showPassword, setShowPassword] = useState(false);
   const { loginUser } = useContext(AuthContext);
 
   const handleLoginChange = (e) => {
@@ -19,9 +23,8 @@ function Login() {
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    
     const dataParaApi = {
-      username: loginData.email, // Lembre-se: enviamos o email no campo 'username'
+      username: loginData.email,
       password: loginData.password,
     };
 
@@ -39,13 +42,13 @@ function Login() {
     }
   };
 
-  // --- ✅ JSX ATUALIZADO COM ESTILOS TAILWIND ---
   return (
-    // Card com fundo escuro, bordas arredondadas e sombra
-    <div className="bg-slate-800 p-8 rounded-lg shadow-lg w-full max-w-md">
-      <h1 className="text-2xl font-bold text-white mb-6 text-center">Faça seu Login</h1>
+    // --- ✅ A CORREÇÃO ESTÁ AQUI ---
+    // Trocamos 'max-w-md' por 'max-w-lg' (mais largo)
+    <div className="bg-slate-800 p-8 rounded-lg shadow-lg w-full max-w-lg">
+    {/* --------------------------- */}
       
-      {/* Formulário com espaçamento entre os campos */}
+      <h1 className="text-2xl font-bold text-white mb-6 text-center">Faça seu Login</h1>
       <form onSubmit={handleLoginSubmit} className="space-y-4">
         
         {/* Campo de E-mail */}
@@ -57,7 +60,6 @@ function Login() {
             value={loginData.email}
             onChange={handleLoginChange}
             required
-            // Input estilizado
             className="w-full p-2 mt-1 rounded bg-slate-700 text-white border border-slate-600 focus:ring-cyan-500 focus:border-cyan-500"
           />
         </div>
@@ -65,17 +67,28 @@ function Login() {
         {/* Campo de Senha */}
         <div>
           <label className="block text-sm font-medium text-gray-300">Senha:</label>
-          <input
-            type="password"
-            name="password"
-            value={loginData.password}
-            onChange={handleLoginChange}
-            required
-            className="w-full p-2 mt-1 rounded bg-slate-700 text-white border border-slate-600 focus:ring-cyan-500 focus:border-cyan-500"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              value={loginData.password}
+              onChange={handleLoginChange}
+              required
+              className="w-full p-2 mt-1 rounded bg-slate-700 text-white border border-slate-600 focus:ring-cyan-500 focus:border-cyan-500"
+            />
+            <div 
+              className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? (
+                <FaEyeSlash className="text-gray-400" />
+              ) : (
+                <FaEye className="text-gray-400" />
+              )}
+            </div>
+          </div>
         </div>
         
-        {/* Botão estilizado */}
         <button 
           type="submit"
           className="w-full bg-cyan-500 text-slate-900 font-bold py-2 px-4 rounded-lg hover:bg-cyan-400 transition-colors shadow-md"

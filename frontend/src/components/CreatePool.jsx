@@ -1,6 +1,6 @@
 // src/components/CreatePool.jsx
 
-import { useState, useEffect } from 'react'; // 1. Importe useEffect
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,9 +17,8 @@ const ESTADOS_BRASILEIROS = [
   { sigla: 'SP', nome: 'São Paulo' }, { sigla: 'SE', nome: 'Sergipe' }, { sigla: 'TO', nome: 'Tocantins' }
 ];
 
-// --- ✅ 2. O COMPONENTE AGORA ACEITA 'props' ---
-// 'piscinaExistente' será os dados da piscina que queremos editar
-// 'onPoolUpdated' é uma função para avisar a página de edição que terminamos
+// (Este componente ainda é usado pela página de "Editar",
+//  por isso ele ainda aceita 'piscinaExistente')
 function CreatePool({ piscinaExistente = null, onPoolUpdated }) {
   const navigate = useNavigate(); 
 
@@ -35,8 +34,7 @@ function CreatePool({ piscinaExistente = null, onPoolUpdated }) {
   const [cidades, setCidades] = useState([]);
   const [loadingCidades, setLoadingCidades] = useState(false);
   
-  // --- ✅ 3. VERIFICA SE ESTAMOS NO MODO "EDITAR" ---
-  // Se 'piscinaExistente' for passada, preenche o formulário
+  // Lógica de "Modo Edição" (sem mudança)
   useEffect(() => {
     if (piscinaExistente) {
       setPoolData({
@@ -47,23 +45,19 @@ function CreatePool({ piscinaExistente = null, onPoolUpdated }) {
         endereco: piscinaExistente.endereco,
         preco_diaria: piscinaExistente.preco_diaria,
       });
-      // (Nota: Não estamos carregando as imagens existentes para edição, 
-      // pois isso é mais complexo. O 'PATCH' não vai apagar as fotos antigas.)
     }
-  }, [piscinaExistente]); // Roda quando 'piscinaExistente' carregar
+  }, [piscinaExistente]); 
 
-  // --- O "ESPIÃO" DO IBGE (sem mudança) ---
+  // Lógica da API do IBGE (sem mudança)
   useEffect(() => {
     if (poolData.estado) {
       setLoadingCidades(true);
-      // Se a cidade já for a correta (do modo de edição), não limpe
       const cidadeAtual = piscinaExistente?.cidade === poolData.cidade ? poolData.cidade : '';
       
       axios.get(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${poolData.estado}/municipios`)
         .then(response => {
           const sortedCidades = response.data.sort((a, b) => a.nome.localeCompare(b.nome));
           setCidades(sortedCidades);
-          // Define a cidade correta se ela veio da edição
           setPoolData(prevData => ({ ...prevData, cidade: cidadeAtual }));
         })
         .catch(error => console.error("Erro ao buscar cidades do IBGE:", error))
@@ -71,7 +65,7 @@ function CreatePool({ piscinaExistente = null, onPoolUpdated }) {
     } else {
       setCidades([]);
     }
-  }, [poolData.estado, piscinaExistente]); // Roda se o estado mudar ou a piscina carregar
+  }, [poolData.estado, piscinaExistente]);
   // ---------------------------------
 
   const handlePoolChange = (e) => {
@@ -85,7 +79,7 @@ function CreatePool({ piscinaExistente = null, onPoolUpdated }) {
     setImagens(Array.from(e.target.files)); 
   };
 
-  // --- ✅ 4. ATUALIZAMOS A LÓGICA DE SUBMIT ---
+  // --- ATUALIZAÇÃO NO SUBMIT ---
   const handlePoolSubmit = async (e) => {
     e.preventDefault();
     if (!poolData.cidade) {
@@ -99,9 +93,22 @@ function CreatePool({ piscinaExistente = null, onPoolUpdated }) {
     }
 
     const formData = new FormData();
+    
+    // Loop pelos dados
     for (const key in poolData) {
-      formData.append(key, poolData[key]);
+      // --- ✅ A CORREÇÃO ESTÁ AQUI ---
+      if (key === 'preco_diaria') {
+        // Substitui a VÍRGULA (,) pelo PONTO (.) antes de enviar
+        const precoCorrigido = poolData[key].replace(',', '.');
+        formData.append(key, precoCorrigido);
+      } else {
+        // Envia os outros campos normalmente
+        formData.append(key, poolData[key]);
+      }
+      // -----------------------------
     }
+    
+    // Adiciona as imagens (sem mudança)
     if (imagens.length > 0) {
       imagens.forEach((imagem) => {
         formData.append('upload_imagens', imagem);
@@ -111,17 +118,15 @@ function CreatePool({ piscinaExistente = null, onPoolUpdated }) {
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
       
-      // --- A MÁGICA DO "CRUD" ---
       if (piscinaExistente) {
         // MODO EDITAR (PATCH)
-        // Usamos a API 'PATCH' que testamos no Thunder Client
         const response = await axios.patch(
           `http://127.0.0.1:8000/api/piscinas/${piscinaExistente.id}/`, 
           formData, 
           { headers: headers }
         );
         alert('Piscina atualizada com sucesso!');
-        if (onPoolUpdated) onPoolUpdated(response.data); // Avisa a página "pai"
+        if (onPoolUpdated) onPoolUpdated(response.data);
       } else {
         // MODO CRIAR (POST)
         await axios.post(
@@ -130,9 +135,8 @@ function CreatePool({ piscinaExistente = null, onPoolUpdated }) {
           { headers: headers }
         );
         alert('Piscina cadastrada com sucesso!');
-        navigate('/'); // Volta para a Home
+        navigate('/'); 
       }
-      // --------------------------
 
     } catch (error) {
       // (bloco catch sem mudança)
@@ -147,12 +151,10 @@ function CreatePool({ piscinaExistente = null, onPoolUpdated }) {
     }
   };
 
-  // --- 5. O JSX (FORMULÁRIO ATUALIZADO) ---
+  // --- JSX (Formulário - sem mudança) ---
   return (
-    // (O 'div' principal foi removido, pois a página "pai" vai controlar o estilo)
     <form onSubmit={handlePoolSubmit} className="space-y-4 w-full max-w-md">
       
-      {/* (Campos do formulário - sem mudança na estrutura, só nos 'values') */}
       <div>
         <label className="block text-sm font-medium text-gray-300">Título do Anúncio:</label>
         <input
@@ -194,7 +196,6 @@ function CreatePool({ piscinaExistente = null, onPoolUpdated }) {
             <option value="">
               {loadingCidades ? "Carregando..." : (poolData.estado ? "Selecione a cidade" : "Selecione um estado")}
             </option>
-            {/* Se estiver editando, pode mostrar a cidade antes de carregar o resto */}
             {piscinaExistente && cidades.length === 0 && poolData.cidade && (
                  <option value={poolData.cidade}>{poolData.cidade}</option>
             )}
@@ -226,10 +227,13 @@ function CreatePool({ piscinaExistente = null, onPoolUpdated }) {
       <div>
         <label className="block text-sm font-medium text-gray-300">Preço por Dia (R$):</label>
         <input
-          type="number" name="preco_diaria" value={poolData.preco_diaria}
-          onChange={handlePoolChange} required
+          type="text" // <-- Mudamos de 'number' para 'text' para aceitar ','
+          name="preco_diaria" 
+          value={poolData.preco_diaria}
+          onChange={handlePoolChange} 
+          required
           className="w-full p-2 mt-1 rounded bg-slate-700 text-white border border-slate-600 focus:ring-cyan-500 focus:border-cyan-500"
-          step="0.01" min="0.00"
+          placeholder="Ex: 150,00"
         />
       </div>
       
@@ -249,7 +253,6 @@ function CreatePool({ piscinaExistente = null, onPoolUpdated }) {
         )}
       </div>
       
-      {/* --- ✅ 6. O BOTÃO AGORA É DINÂMICO --- */}
       <button 
         type="submit"
         className="w-full bg-cyan-500 text-slate-900 font-bold py-2 px-4 rounded-lg hover:bg-cyan-400 transition-colors shadow-md"
