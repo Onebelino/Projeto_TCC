@@ -1,3 +1,5 @@
+// src/main.jsx
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
@@ -13,7 +15,9 @@ import RegisterPage from './pages/RegisterPage.jsx';
 import CreatePoolPage from './pages/CreatePoolPage.jsx';
 import LocadorDashboardPage from './pages/LocadorDashboardPage.jsx';
 import MyReservationsPage from './pages/MyReservationsPage.jsx';
-import PoolDetailPage from './pages/PoolDetailPage.jsx'; // <-- ✅ NOVO IMPORT
+import PoolDetailPage from './pages/PoolDetailPage.jsx';
+import MyPoolsPage from './pages/MyPoolsPage.jsx';
+import EditPoolPage from './pages/EditPoolPage.jsx'; // <-- ✅ NOVO IMPORT
 
 // Protetores de Rota
 import LocatarioRoute from './components/LocatarioRoute.jsx';
@@ -25,31 +29,16 @@ const router = createBrowserRouter([
     element: <App />, 
     children: [ 
       // --- Rotas Públicas ---
-      {
-        index: true, 
-        element: <HomePage />,
-      },
-      {
-        path: 'login', 
-        element: <LoginPage />,
-      },
-      {
-        path: 'register', 
-        element: <RegisterPage />,
-      },
-      {
-        path: 'piscinas/:id', // <-- ✅ NOVA ROTA PÚBLICA
-        element: <PoolDetailPage />,
-      },
+      { index: true, element: <HomePage /> },
+      { path: 'login', element: <LoginPage /> },
+      { path: 'register', element: <RegisterPage /> },
+      { path: 'piscinas/:id', element: <PoolDetailPage /> },
       
       // --- Rota Protegida de LOCATÁRIO ---
       {
         element: <LocatarioRoute />, 
         children: [
-          {
-            path: 'minhas-reservas', 
-            element: <MyReservationsPage />,
-          }
+          { path: 'minhas-reservas', element: <MyReservationsPage /> }
         ]
       },
 
@@ -57,14 +46,10 @@ const router = createBrowserRouter([
       {
         element: <LocadorRoute />,
         children: [
-          {
-            path: 'nova-piscina', 
-            element: <CreatePoolPage />, 
-          },
-          {
-            path: 'dashboard',
-            element: <LocadorDashboardPage />,
-          }
+          { path: 'nova-piscina', element: <CreatePoolPage /> },
+          { path: 'dashboard', element: <LocadorDashboardPage /> },
+          { path: 'minhas-piscinas', element: <MyPoolsPage /> },
+          { path: 'piscinas/:id/editar', element: <EditPoolPage /> } // <-- ✅ NOVA ROTA
         ]
       },
     ],

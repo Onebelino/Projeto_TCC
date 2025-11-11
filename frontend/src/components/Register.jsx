@@ -6,15 +6,14 @@ import { useNavigate } from 'react-router-dom';
 
 function Register() {
   const [registerData, setRegisterData] = useState({
-    username: '',
     email: '',
     password: '',
     password2: '',
     tipo: 'LOCATARIO',
     telefone: '', 
     cpf: '',
-    nome_completo: '', // <-- ✅ NOVO ESTADO
-    data_nascimento: '', // <-- ✅ NOVO ESTADO
+    nome_completo: '', 
+    data_nascimento: '', // O 'estado' inicial ainda pode ser ''
   });
   
   const navigate = useNavigate();
@@ -33,46 +32,58 @@ function Register() {
       return;
     }
     
-    // 1. Preparar os dados do usuário
+    // 1. Preparar os dados do usuário (SEM USERNAME)
     const dadosUser = {
-      username: registerData.username,
       email: registerData.email,
       password: registerData.password,
       password2: registerData.password2,
     };
 
-    // 2. Preparar os dados do perfil (com os novos campos)
+    // 2. Preparar os dados do perfil
     const dadosParaApi = {
       tipo: registerData.tipo,
       user: dadosUser,
       telefone: registerData.telefone,
       cpf: registerData.cpf,
-      nome_completo: registerData.nome_completo, // <-- ✅ NOVO
-      data_nascimento: registerData.data_nascimento, // <-- ✅ NOVO
+      nome_completo: registerData.nome_completo,
+      
+      // --- ✅ A CORREÇÃO DO "PRÓXIMO" BUG ESTÁ AQUI ---
+      // "Se a data de nascimento for uma string vazia, envie 'null'.
+      //  Senão, envie a data."
+      data_nascimento: registerData.data_nascimento || null,
+      // -----------------------------
     };
     
     try {
       await axios.post('http://127.0.0.1:8000/api/register/', dadosParaApi);
       alert('Usuário criado com sucesso! Por favor, faça o login.');
-      navigate('/login'); // Redireciona para o login após o sucesso
+      navigate('/login');
 
     } catch (error) {
       if (error.response) {
         console.error('Erro do servidor:', error.response.data);
-        alert('Erro ao registrar: ' + JSON.stringify(error.response.data));
+        // --- ✅ BÔNUS: MELHORANDO O ALERT DE ERRO ---
+        // Agora, se o erro for "username required", ele vai mostrar
+        const errorData = error.response.data;
+        if (errorData.user && errorData.user.username) {
+            alert(`Erro ao registrar: ${errorData.user.username[0]}`);
+        } else if (errorData.user && errorData.user.email) {
+            alert(`Erro ao registrar: ${errorData.user.email[0]}`);
+        } else {
+            alert('Erro ao registrar: ' + JSON.stringify(errorData));
+        }
       } else {
         alert('Erro ao registrar.');
       }
     }
   };
 
-  // --- ✅ JSX ATUALIZADO COM ESTILOS E NOVOS CAMPOS ---
+  // --- O JSX (Formulário - sem mudança) ---
   return (
     <div className="bg-slate-800 p-8 rounded-lg shadow-lg w-full max-w-md">
       <h1 className="text-2xl font-bold text-white mb-6 text-center">Crie sua Conta</h1>
       <form onSubmit={handleRegisterSubmit} className="space-y-4">
         
-        {/* --- ✅ NOVOS CAMPOS --- */}
         <div>
           <label className="block text-sm font-medium text-gray-300">Nome Completo:</label>
           <input
@@ -85,30 +96,17 @@ function Register() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-300">Data de Nascimento:</label>
+          <label className="block text-sm font-medium text-gray-300">Data de Nascimento (Opcional):</label>
           <input
-            type="date" // <-- Input de data
+            type="date"
             name="data_nascimento"
             value={registerData.data_nascimento}
             onChange={handleRegisterChange}
-            required
+            // (Este campo não é mais 'required')
             className="w-full p-2 mt-1 rounded bg-slate-700 text-white border border-slate-600 focus:ring-cyan-500 focus:border-cyan-500"
           />
         </div>
-        {/* -------------------- */}
         
-        <div>
-          <label className="block text-sm font-medium text-gray-300">Nome de Usuário (Apelido):</label>
-          <input
-            type="text"
-            name="username"
-            value={registerData.username}
-            onChange={handleRegisterChange}
-            required
-            className="w-full p-2 mt-1 rounded bg-slate-700 text-white border border-slate-600 focus:ring-cyan-500 focus:border-cyan-500"
-          />
-        </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-300">Email:</label>
           <input
@@ -121,7 +119,6 @@ function Register() {
           />
         </div>
 
-        {/* ... (Campos de Senha e Confirmação de Senha) ... */}
         <div>
           <label className="block text-sm font-medium text-gray-300">Senha:</label>
           <input
@@ -158,7 +155,6 @@ function Register() {
           </select>
         </div>
         
-        {/* Mostra os campos de CPF e Telefone SÓ se for Locador */}
         {registerData.tipo === 'LOCADOR' && (
           <>
             <div>
