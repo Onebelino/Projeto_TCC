@@ -2,21 +2,20 @@
 
 import { useContext } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import AuthContext from '../context/AuthContext';
+import AuthContext from '../context/AuthContext.jsx';
 
-// Este componente é um "wrapper"
-// Se o usuário não estiver logado, ele redireciona para /login
-// Se estiver logado, ele renderiza o <Outlet /> (a página filha)
+// Este é o "Segurança" GERAL.
+// Ele só checa se o usuário está logado, não importa o tipo.
 
 const ProtectedRoute = () => {
   const { user } = useContext(AuthContext); // Lê o estado do usuário
 
   if (!user) {
-    // Se não há usuário, redireciona para o login
+    // Se não há usuário, chuta para o /login
     return <Navigate to="/login" replace />;
   }
 
-  // Se houver um usuário, renderiza a página que ele tentou acessar
+  // Se está logado (Locador OU Locatário), deixa passar
   return <Outlet />;
 };
 

@@ -17,18 +17,28 @@ function Navbar() {
         
         <div className="flex items-center gap-4">
           
+          {/* SE 'user' existir (está logado): */}
           {user ? (
             <>
-              {/* --- Links do LOCADOR --- */}
+              {/* --- ✅ LÓGICA ATUALIZADA AQUI --- */}
+              
+              {/* Este link aparece para TODOS os usuários logados */}
+              <Link 
+                to="/minhas-reservas" 
+                className="font-medium hover:text-cyan-400 transition-colors"
+              >
+                Minhas Reservas
+              </Link>
+
+              {/* Estes links aparecem APENAS se for LOCADOR */}
               {user.profile_tipo === 'LOCADOR' && (
                 <>
                   <Link 
                     to="/dashboard"
                     className="font-medium hover:text-cyan-400 transition-colors"
                   >
-                    Painel (Reservas)
+                    Meu Painel (Donos)
                   </Link>
-                  {/* --- ✅ NOVO LINK AQUI --- */}
                   <Link 
                     to="/minhas-piscinas"
                     className="font-medium hover:text-cyan-400 transition-colors"
@@ -43,21 +53,14 @@ function Navbar() {
                   </Link>
                 </>
               )}
+              {/* ---------------------------------- */}
 
-              {/* --- Link do LOCATÁRIO --- */}
-              {user.profile_tipo === 'LOCATARIO' && (
-                <Link 
-                  to="/minhas-reservas" 
-                  className="font-medium hover:text-cyan-400 transition-colors"
-                >
-                  Minhas Reservas
-                </Link>
-              )}
-
+              {/* Olá, Usuário (Aparece para ambos) */}
               <span className="text-gray-400">
                 Olá, {user.display_name}!
               </span>
 
+              {/* Botão de Logout (Aparece para ambos) */}
               <button 
                 onClick={logoutUser} 
                 className="bg-cyan-500 text-slate-900 font-bold py-2 px-4 rounded-lg hover:bg-cyan-400 transition-colors shadow-md"
@@ -66,6 +69,8 @@ function Navbar() {
               </button>
             </>
           ) : (
+          
+          /* SENÃO (NÃO está logado): */
             <>
               <Link 
                 to="/login" 
