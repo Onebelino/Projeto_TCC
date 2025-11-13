@@ -18,10 +18,13 @@ import CreatePoolPage from './pages/CreatePoolPage.jsx';
 import LocadorDashboardPage from './pages/LocadorDashboardPage.jsx';
 import MyPoolsPage from './pages/MyPoolsPage.jsx';
 import EditPoolPage from './pages/EditPoolPage.jsx';
-import ProfilePage from './pages/ProfilePage.jsx'; // <-- ✅ NOVO IMPORT
+import ProfilePage from './pages/ProfilePage.jsx';
+import TermosDeUsoPage from './pages/TermosDeUsoPage.jsx';
+// --- ✅ NOVO IMPORT ---
+import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx'; 
 
 // Protetores de Rota
-import ProtectedRoute from './components/ProtectedRoute.jsx'; // O "Segurança" GERAL
+import ProtectedRoute from './components/ProtectedRoute.jsx';
 import LocatarioRoute from './components/LocatarioRoute.jsx';
 import LocadorRoute from './components/LocadorRoute.jsx'; 
 
@@ -35,27 +38,25 @@ const router = createBrowserRouter([
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
       { path: 'piscinas/:id', element: <PoolDetailPage /> },
+      { path: 'termos-de-uso', element: <TermosDeUsoPage /> },
       
-      // --- Rota Protegida (GERAL - QUALQUER UM LOGADO) ---
+      // --- ✅ NOVA ROTA ---
+      { path: 'esqueceu-a-senha', element: <ForgotPasswordPage /> },
+      
+      // --- Rota Protegida (GERAL) ---
       {
         element: <ProtectedRoute />,
         children: [
-          {
-            path: 'perfil', // <-- ✅ NOVA ROTA
-            element: <ProfilePage />,
-          },
-          {
-            path: 'minhas-reservas', 
-            element: <MyReservationsPage />,
-          }
+          { path: 'perfil', element: <ProfilePage /> },
+          { path: 'minhas-reservas', element: <MyReservationsPage /> }
         ]
       },
 
-      // --- Rota Protegida de LOCATÁRIO (Se houver alguma) ---
+      // --- Rota Protegida de LOCATÁRIO ---
       {
         element: <LocatarioRoute />, 
         children: [
-          // (Vazia)
+           // (Vazia por enquanto, pois 'minhas-reservas' movemos para a geral)
         ]
       },
 
@@ -73,9 +74,10 @@ const router = createBrowserRouter([
   },
 ]);
 
-// Renderiza o App
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
+
       <RouterProvider router={router} />
+
   </React.StrictMode>,
 );

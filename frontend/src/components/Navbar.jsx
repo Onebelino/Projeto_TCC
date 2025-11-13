@@ -8,84 +8,81 @@ function Navbar() {
   const { user, logoutUser } = useContext(AuthContext);
 
   return (
-    <nav className="bg-slate-900 text-gray-200 shadow-lg">
+    // --- ✅ MUDANÇA: Navbar Branca com Sombra Mais Forte ---
+    <nav className="bg-white text-gray-800 shadow-xl sticky top-0 z-50"> 
       <div className="container mx-auto flex justify-between items-center p-4">
         
-        <Link to="/" className="text-xl font-bold text-white hover:text-cyan-400 transition-colors">
+        {/* Logo agora é 'text-blue-600' (um azul piscina mais profundo) */}
+        <Link to="/" className="text-2xl font-bold text-blue-600 hover:text-blue-500 transition-colors">
           PiscinaFácil
         </Link>
         
         <div className="flex items-center gap-4">
           
-          {/* SE 'user' existir (está logado): */}
           {user ? (
             <>
-              {/* --- ✅ LÓGICA CORRIGIDA AQUI --- */}
-              
-              {/* 1. Links que TODOS os usuários logados veem */}
+              {/* Links de Usuário Logado */}
               <Link 
                 to="/minhas-reservas" 
-                className="font-medium hover:text-cyan-400 transition-colors"
+                className="font-medium hover:text-blue-600 transition-colors"
               >
-                Minhas Reservas (Cliente)
+                Minhas Reservas
               </Link>
               <Link 
                 to="/perfil" 
-                className="font-medium hover:text-cyan-400 transition-colors"
+                className="font-medium hover:text-blue-600 transition-colors"
               >
                 Meu Perfil
               </Link>
 
-              {/* 2. Links que SÓ O LOCADOR vê (além dos de cima) */}
+              {/* Links SÓ de LOCADOR */}
               {user.profile_tipo === 'LOCADOR' && (
                 <>
                   <Link 
                     to="/dashboard"
-                    className="font-medium hover:text-cyan-400 transition-colors"
+                    className="font-medium hover:text-blue-600 transition-colors"
                   >
                     Painel (Donos)
                   </Link>
                   <Link 
                     to="/minhas-piscinas"
-                    className="font-medium hover:text-cyan-400 transition-colors"
+                    className="font-medium hover:text-blue-600 transition-colors"
                   >
                     Minhas Piscinas
                   </Link>
                   <Link 
                     to="/nova-piscina" 
-                    className="font-medium hover:text-cyan-400 transition-colors"
+                    className="font-medium hover:text-blue-600 transition-colors"
                   >
                     Cadastrar Piscina
                   </Link>
                 </>
               )}
-              {/* ------------------------------------------- */}
 
-              {/* 3. Info do Usuário (Nome e Sair) */}
-              <span className="text-gray-400">
+              {/* Texto "Olá" e Botão "Sair" */}
+              <span className="text-gray-600 hidden md:block">
                 Olá, {user.display_name}!
               </span>
-
               <button 
                 onClick={logoutUser} 
-                className="bg-cyan-500 text-slate-900 font-bold py-2 px-4 rounded-lg hover:bg-cyan-400 transition-colors shadow-md"
+                className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
               >
                 Sair (Logout)
               </button>
             </>
           ) : (
             
-            // 4. Links de quem NÃO está logado
+            // Links de Visitante (Deslogado)
             <>
               <Link 
                 to="/login" 
-                className="font-medium hover:text-cyan-400 transition-colors"
+                className="font-medium hover:text-blue-600 transition-colors"
               >
                 Login
               </Link>
               <Link 
                 to="/register" 
-                className="bg-cyan-500 text-slate-900 font-bold py-2 px-4 rounded-lg hover:bg-cyan-400 transition-colors shadow-md"
+                className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
               >
                 Registrar
               </Link>

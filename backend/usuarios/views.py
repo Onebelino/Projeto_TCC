@@ -5,7 +5,7 @@ from rest_framework.response import Response # <-- 1. Importe a Response
 from rest_framework.views import APIView # <-- 1. Importe a APIView
 
 # --- ✅ 1. IMPORTES ATUALIZADOS ---
-from .serializers import RegisterSerializer, MyTokenObtainPairSerializer, ProfileUpdateSerializer
+from .serializers import RegisterSerializer, MyTokenObtainPairSerializer, ProfileUpdateSerializer, PasswordResetSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 # ----------------------------------
 
@@ -48,3 +48,17 @@ class UserDeleteView(APIView):
         
         # Retorna uma resposta de sucesso sem conteúdo
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class PasswordResetView(generics.GenericAPIView):
+    serializer_class = PasswordResetSerializer
+    permission_classes = [permissions.AllowAny] # Qualquer um pode tentar recuperar
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save() # Troca a senha
+            return Response(
+                {"message": "Senha alterada com sucesso! Faça login com a nova senha."}, 
+                status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

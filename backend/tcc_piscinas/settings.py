@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'piscinas',
     'reservas',
     'django_filters',
+    'avaliacoes',
 ]
 
 MIDDLEWARE = [

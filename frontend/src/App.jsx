@@ -3,20 +3,33 @@
 import { Outlet } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import { AuthProvider } from './context/AuthContext.jsx';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
     <AuthProvider>
-      {/* O 'div' principal SÓ controla o fundo e a altura */}
-      <div className="bg-slate-900 min-h-screen flex flex-col">
+      {/* --- ✅ MUDANÇA: Fundo Claro (bg-gray-50) e Texto Escuro --- */}
+      <div className="bg-gray-50 min-h-screen flex flex-col text-gray-900">
         
+        {/* Toast com tema claro */}
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light" 
+        />
+
         <Navbar />
 
-        {/* --- ✅ A CORREÇÃO ESTÁ AQUI --- */}
-        {/* O 'main' agora NÃO centraliza. Ele só dá um padding
-            para o conteúdo não colar nas bordas da tela. */}
+        {/* Container principal */}
         <main className="flex-grow container mx-auto p-4 md:p-8">
-        {/* --------------------------- */}
           <Outlet />
         </main>
 

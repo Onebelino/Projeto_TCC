@@ -20,6 +20,7 @@ urlpatterns = [
     path('api/', include('usuarios.urls')), 
     path('api/', include('piscinas.urls')), 
     path('api/', include('reservas.urls')), 
+    path('api/', include('avaliacoes.urls')),
 
     # --- 2. APONTAMOS PARA A VIEW CORRETA ---
     # A URL de 'token' (login) agora usa a NOSSA view
