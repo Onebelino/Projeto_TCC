@@ -1,14 +1,16 @@
-# TCC/backend/usuarios/serializers.py
-
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Profile
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework import validators # Importante para o UniqueValidator
+from rest_framework import validators
 from datetime import date
 
-# --- Serializer de Token (sem mudança) ---
+# --- ✅ ATUALIZAÇÃO AQUI ---
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Este serializer customizado adiciona o 'display_name' E
+    o 'profile_id' ao token JWT.
+    """
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
@@ -16,15 +18,18 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             profile = user.profile
             token['profile_tipo'] = profile.tipo
             token['display_name'] = profile.nome_completo or user.username
+            token['profile_id'] = profile.id # <-- A LINHA QUE FALTAVA
+            
         except Profile.DoesNotExist:
             token['profile_tipo'] = None
             token['display_name'] = user.username
+            token['profile_id'] = None
         return token
+# --------------------------------
 
 # --- Serializer de Usuário (sem mudança) ---
 class UserSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
-    
     class Meta:
         model = User
         fields = ['username', 'email', 'password', 'password2']
@@ -41,21 +46,16 @@ class UserSerializer(serializers.ModelSerializer):
             },
             'username': {'required': False}
         }
-
     def validate(self, data):
         if data['password'] != data['password2']:
             raise serializers.ValidationError("Senhas não conferem.")
         return data
 
-# --- Serializer de Registro (ATUALIZADO COM SEGURANÇA DE CPF) ---
+# --- Serializer de Registro (sem mudança) ---
 class RegisterSerializer(serializers.ModelSerializer):
     user = UserSerializer(required=True)
-    
     tipo = serializers.ChoiceField(choices=Profile.TipoUsuario.choices)
     telefone = serializers.CharField(required=True, allow_blank=False, max_length=20)
-    
-    # --- ✅ SEGURANÇA EXTRA AQUI ---
-    # Adicionamos o UniqueValidator para o CPF também!
     cpf = serializers.CharField(
         required=True, 
         allow_blank=False, 
@@ -67,36 +67,23 @@ class RegisterSerializer(serializers.ModelSerializer):
             )
         ]
     )
-    # ------------------------------
-    
     nome_completo = serializers.CharField(required=True, allow_blank=False, max_length=255)
     data_nascimento = serializers.DateField(required=True)
 
     class Meta:
         model = Profile
-        fields = [
-            'user', 
-            'tipo', 
-            'telefone', 
-            'cpf',
-            'nome_completo',
-            'data_nascimento'
-        ]
+        fields = [ 'user', 'tipo', 'telefone', 'cpf', 'nome_completo', 'data_nascimento' ]
 
-    # Validação matemática do CPF (sem mudança)
     def validate_cpf(self, value):
-        if not value:
-            return value
+        if not value: return value
         from validate_docbr import CPF
         cpf_validator = CPF()
         if not cpf_validator.validate(value):
             raise serializers.ValidationError("Este CPF não é válido.")
         return value
 
-    # Validação de Idade (sem mudança)
     def validate_data_nascimento(self, value):
-        if not value:
-            return value
+        if not value: return value
         hoje = date.today()
         idade = hoje.year - value.year - ((hoje.month, hoje.day) < (value.month, value.day))
         if idade < 18:
@@ -129,7 +116,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         return profile
 
-# Serializer de Edição de Perfil (sem mudança)
+# --- Serializer de Edição de Perfil (sem mudança) ---
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
@@ -140,8 +127,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
             'telefone': {'required': False},
         }
 
-# --- ✅ AQUI ESTÁ O SERIALIZER DE REDEFINIÇÃO DE SENHA ---
-# (Já deixei pronto para o próximo passo, para não esquecermos)
+# --- Serializer de Reset de Senha (sem mudança) ---
 class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     cpf = serializers.CharField(required=True, max_length=14)
@@ -151,19 +137,14 @@ class PasswordResetSerializer(serializers.Serializer):
     def validate(self, data):
         if data['new_password'] != data['confirm_password']:
             raise serializers.ValidationError("As novas senhas não conferem.")
-        
         try:
             user = User.objects.get(email=data['email'])
         except User.DoesNotExist:
             raise serializers.ValidationError("Nenhum usuário encontrado com este e-mail.")
-
         if not hasattr(user, 'profile'):
              raise serializers.ValidationError("Este usuário não possui um perfil completo.")
-        
-        # Verifica se o CPF bate
         if user.profile.cpf != data['cpf']:
             raise serializers.ValidationError("O CPF informado não corresponde a este e-mail.")
-
         data['user'] = user
         return data
 
@@ -173,5 +154,3 @@ class PasswordResetSerializer(serializers.Serializer):
         user.set_password(new_password)
         user.save()
         return user
-    
-    

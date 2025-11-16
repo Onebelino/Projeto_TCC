@@ -1,60 +1,77 @@
-/* frontend/src/index.css */
-
+/* --- 1. Imports Padrão do Tailwind (Sem mudança) --- */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* --- 📅 ESTILIZAÇÃO PROFISSIONAL DO CALENDÁRIO --- */
+/* --- ✅ 2. O NOSSO NOVO CSS PARA O CALENDÁRIO --- */
+/* Isso vai "invadir" o CSS do react-datepicker */
 
-/* 1. O "Card" do Calendário */
+/* O "card" principal do calendário */
 .react-datepicker {
-  font-family: 'Inter', system-ui, sans-serif !important;
-  background-color: white !important;
-  border: 1px solid #e2e8f0 !important; /* Borda cinza clara */
-  border-radius: 1rem !important;        /* Cantos bem arredondados */
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  font-family: 'Inter', system-ui, sans-serif !important; /* Usa a mesma fonte do site */
+  background-color: #ffffff !important; /* Fundo branco */
+  border: 1px solid #e5e7eb !important; /* Borda cinza clara (gray-200) */
+  border-radius: 1rem !important;        /* Cantos bem arredondados (rounded-xl) */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
   overflow: hidden !important;
   font-size: 0.95rem !important;
 }
 
-/* 2. O Cabeçalho (Onde diz o Mês) */
+/* O "triângulo" (setinha) que aponta para o input (não usamos, mas é bom esconder) */
+.react-datepicker__triangle {
+  display: none !important;
+}
+
+/* O Header (Ex: "Novembro 2025") */
 .react-datepicker__header {
-  background-color: #f0f9ff !important; /* Fundo azulzinho muito claro */
-  border-bottom: 1px solid #e2e8f0 !important;
+  background-color: #f9fafb !important; /* Fundo cinza super claro (gray-50) */
+  border-bottom: 1px solid #e5e7eb !important;
+  border-radius: 0.75rem 0.75rem 0 0 !important;
   padding-top: 1rem !important;
 }
 
+/* Texto do Mês (Ex: "Novembro") */
 .react-datepicker__current-month {
-  color: #0ea5e9 !important; /* Azul Ciano (combinando com o site) */
-  font-weight: 800 !important;
+  color: #0284c7 !important; /* Azul "Piscina" (sky-600) */
+  font-weight: 700 !important; /* bold */
   text-transform: capitalize !important;
   margin-bottom: 0.5rem !important;
   font-size: 1.1rem !important;
 }
 
+/* Nomes dos dias (D, S, T, Q...) */
 .react-datepicker__day-names {
   margin-top: 0.5rem !important;
 }
-
 .react-datepicker__day-name {
-  color: #64748b !important; /* Cinza */
+  color: #6b7280 !important; /* Cinza (gray-500) */
   font-weight: 600 !important;
   width: 2.5rem !important;
 }
 
-/* 3. Os Dias (Números) */
+/* As setas de navegação ( < > ) */
+.react-datepicker__navigation-icon::before {
+   border-color: #0ea5e9 !important; /* Azul (sky-500) */
+   border-width: 2px 2px 0 0 !important;
+   top: 10px !important;
+}
+.react-datepicker__navigation:hover .react-datepicker__navigation-icon::before {
+   border-color: #0284c7 !important; /* Azul mais escuro */
+}
+
+/* Os dias (números) */
 .react-datepicker__day {
   width: 2.5rem !important;
   line-height: 2.5rem !important;
   margin: 0.2rem !important;
   border-radius: 50% !important; /* Bolinhas redondas */
-  color: #334155 !important;
+  color: #334155 !important; /* text-slate-700 */
   transition: all 0.2s ease-in-out !important;
 }
 
-/* Hover (Quando passa o mouse) */
+/* Dia com mouse em cima (hover) */
 .react-datepicker__day:hover {
-  background-color: #e0f2fe !important; /* Azul claro */
+  background-color: #e0f2fe !important; /* Azul claro (sky-100) */
   color: #0284c7 !important; /* Azul escuro */
   font-weight: bold !important;
 }
@@ -63,16 +80,16 @@
 .react-datepicker__day--selected,
 .react-datepicker__day--range-end,
 .react-datepicker__day--range-start {
-  background-color: #0ea5e9 !important; /* Azul Ciano Vibrante */
+  background-color: #0ea5e9 !important; /* Azul Ciano Vibrante (sky-500) */
   color: white !important;
   font-weight: bold !important;
 }
-
 /* O "meio" do intervalo selecionado */
 .react-datepicker__day--in-range,
 .react-datepicker__day--in-selecting-range {
-  background-color: #bae6fd !important; /* Azul bem clarinho */
-  color: #0369a1 !important;
+  background-color: #bae6fd !important; /* Azul bem clarinho (sky-200) */
+  color: #0369a1 !important; /* sky-700 */
+  border-radius: 0 !important; /* Deixa quadrado no meio */
 }
 
 /* O dia de hoje */
@@ -90,7 +107,7 @@
 
 /* 5. Dias Bloqueados (Cinza) */
 .react-datepicker__day--disabled {
-  color: #cbd5e1 !important; /* Cinza bem claro */
+  color: #d1d5db !important; /* text-gray-300 */
   cursor: not-allowed !important;
   text-decoration: line-through !important; /* Risco no número */
 }
@@ -98,18 +115,7 @@
   background-color: transparent !important;
 }
 
-/* 6. Setas de Navegação */
-.react-datepicker__navigation {
-  top: 12px !important;
-}
-.react-datepicker__navigation-icon::before {
-  border-color: #0ea5e9 !important; /* Setas azuis */
-  border-width: 3px 3px 0 0 !important;
-  height: 10px !important;
-  width: 10px !important;
-}
-
-/* Remove o triângulo feio em cima */
-.react-datepicker__triangle {
-  display: none !important;
+/* 6. Dias de outros meses (cinza claro) */
+.react-datepicker__day--outside-month {
+   color: #9ca3af !important; /* text-gray-400 */
 }
