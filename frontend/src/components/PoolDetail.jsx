@@ -4,12 +4,12 @@ import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css"; // Continua importando o CSS base
+import "react-datepicker/dist/react-datepicker.css";
 import AuthContext from '../context/AuthContext';
 import { Carousel } from 'react-responsive-carousel';
 import "react-responsive-carousel/lib/styles/carousel.min.css"; 
 import { toast } from 'react-toastify'; 
-import StarRating from './StarRating';
+import StarRating from './StarRating'; // Nosso componente caseiro
 
 function PoolDetail() {
   const [pool, setPool] = useState(null);
@@ -30,13 +30,7 @@ function PoolDetail() {
   const [replyingTo, setReplyingTo] = useState(null); 
   const [replyText, setReplyText] = useState('');
   
-  const { authToken, user } = useContext(AuthContext);
-
-  // (Todas as suas funções de lógica: getDatesBetween, fetchPoolData, 
-  // handleSubmitReview, handleSubmitReply, handleDateChange, 
-  // handleSubmitReserva... continuam EXATAMENTE as mesmas)
-  
-  // ... (Vamos pular para o JSX) ...
+  const { authToken, user } = useContext(AuthContext); // 'user' vem do token
 
   const getDatesBetween = (startDate, endDate) => {
     const dates = [];
@@ -48,6 +42,7 @@ function PoolDetail() {
     }
     return dates;
   };
+
   const fetchPoolData = async () => {
     setLoading(true);
     try {
@@ -77,9 +72,11 @@ function PoolDetail() {
     }
     setLoading(false);
   };
+
   useEffect(() => {
     fetchPoolData();
   }, [poolId, navigate]);
+
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     if (!authToken) { toast.error("Faça login para avaliar."); return; }
@@ -100,6 +97,7 @@ function PoolDetail() {
       }
     }
   };
+
   const handleSubmitReply = async (avaliacaoId) => {
     if (!replyText.trim()) return;
     try {
@@ -115,6 +113,7 @@ function PoolDetail() {
       toast.error("Erro ao enviar resposta.");
     }
   };
+
   const handleDateChange = (dates) => {
     const [start, end] = dates;
     setStartDate(start); setEndDate(end);
@@ -128,19 +127,24 @@ function PoolDetail() {
       setTotalPrice(0);
     }
   };
+
   const handleSubmitReserva = async () => {
     if (!pool || !startDate || !endDate) { toast.warn("Selecione um intervalo de datas."); return; }
     if (!authToken) { toast.error("Você precisa estar logado!"); navigate('/login'); return; }
+    
     const data_inicio = startDate.toISOString().split('T')[0];
     const data_fim = endDate.toISOString().split('T')[0];
     const reservaData = {
       piscina: pool.id, data_inicio, data_fim, preco_total: totalPrice.toFixed(2),
     };
+
     try {
       const headers = { 'Authorization': `Bearer ${authToken}` };
       const response = await axios.post('http://127.0.0.1:8000/api/reservas/', reservaData, { headers });
       const novaReserva = response.data;
+      
       toast.success(`Solicitação (ID: ${novaReserva.id}) enviada! Status: PENDENTE.`);
+
       if (pool.dono_telefone) {
         const phone = pool.dono_telefone.replace(/\D/g, '');
         const whatsappNumber = `55${phone}`;
@@ -153,8 +157,10 @@ function PoolDetail() {
       } else {
         toast.info("Reserva pendente! O locador será notificado.");
       }
+      
       setStartDate(null); setEndDate(null); setTotalPrice(0);
       setBlockedDates([...blockedDates, ...getDatesBetween(data_inicio, data_fim)]);
+
     } catch (error) {
       console.error('Erro ao criar reserva:', error);
       if (error.response && error.response.status === 400) {
@@ -170,12 +176,17 @@ function PoolDetail() {
   if (!pool) { return <div className="text-gray-600 text-center p-10">Piscina não encontrada.</div>; }
 
   const isLocador = user && user.profile_tipo === 'LOCADOR';
-  const isOwner = isLocador && String(pool.dono) === String(user.user_id);
+  
+  // --- ✅ A LÓGICA CORRIGIDA ---
+  // Compara o 'profile_id' do token com o 'dono' (que é o ID do perfil) da piscina
+  // (Certifique-se que o 'user' do AuthContext TEM 'profile_id')
+  const isOwner = isLocador && user && user.profile_id === pool.dono;
+  // -----------------------------
 
   return (
     <div className="w-full max-w-6xl p-8 bg-white rounded-2xl shadow-xl mt-10 mb-10 border border-gray-100">
       
-      {/* Carrossel (sem mudança) */}
+      {/* Carrossel */}
       {pool.imagens && pool.imagens.length > 0 ? (
         <Carousel showThumbs={false} autoPlay={true} infiniteLoop={true} showStatus={false} className="rounded-xl overflow-hidden mb-6 shadow-md">
           {pool.imagens.map(img => (
@@ -190,7 +201,7 @@ function PoolDetail() {
         </div>
       )}
 
-      {/* Info Principal (sem mudança) */}
+      {/* Título e Preço */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mt-6">
         <div>
           <h1 className="text-4xl font-bold text-gray-900">{pool.titulo}</h1>
@@ -211,7 +222,7 @@ function PoolDetail() {
         </div>
       </div>
       
-      {/* Descrição (sem mudança) */}
+      {/* Descrição */}
       <div className="mt-8 p-6 bg-gray-50 rounded-xl">
         <h3 className="text-lg font-bold text-gray-800 mb-2">Sobre este lugar</h3>
         <p className="text-gray-700 leading-relaxed">{pool.descricao}</p>
@@ -224,10 +235,6 @@ function PoolDetail() {
         <div className="flex-1">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Disponibilidade</h2>
           <p className="text-gray-500 mb-4">Selecione a data de entrada e saída no calendário abaixo.</p>
-          
-          {/* --- ✅ AQUI ESTÁ A "LIMPEZA" --- */}
-          {/* Removemos todas as classes customizadas (ex: calendarClassName)
-              Agora ele vai usar 100% o nosso CSS do 'index.css' */}
           <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 inline-block">
             <DatePicker 
               selected={startDate} 
@@ -238,17 +245,15 @@ function PoolDetail() {
               minDate={new Date()}
               inline
               excludeDates={blockedDates} 
+              // Usando o CSS Global do index.css (tema light)
             />
           </div>
-          {/* ------------------------------- */}
-
         </div>
         
-        {/* Sumário de Pagamento (sem mudança) */}
+        {/* Sumário */}
         <div className="w-full lg:w-1/3">
           <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-lg sticky top-24">
             <h3 className="text-xl font-bold text-gray-900 mb-4">Resumo da Reserva</h3>
-            {/* ... (resto do sumário) ... */}
             <div className="space-y-3 text-gray-600">
               <div className="flex justify-between">
                 <span>Diária:</span>
@@ -282,11 +287,10 @@ function PoolDetail() {
       
       <hr className="my-10 border-gray-200" />
       
-      {/* Avaliações (sem mudança) */}
+      {/* Avaliações */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          O que dizem os clientes
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">O que dizem os clientes</h2>
+        
         {authToken && !isLocador && (
           <div className="mb-10 bg-blue-50 p-6 rounded-xl border border-blue-100">
             <h3 className="text-lg font-bold text-blue-900 mb-4">Avalie sua experiência</h3>
@@ -312,6 +316,7 @@ function PoolDetail() {
             </form>
           </div>
         )}
+
         {reviews.length === 0 ? (
           <p className="text-gray-500 italic">Esta piscina ainda não tem avaliações.</p>
         ) : (
@@ -329,14 +334,19 @@ function PoolDetail() {
                     {new Date(review.criado_em).toLocaleDateString('pt-BR')}
                   </small>
                 </div>
+                
                 <p className="text-gray-700 mt-2">"{review.comentario}"</p>
+
                 {review.resposta && (
                   <div className="mt-4 ml-4 pl-4 border-l-4 border-blue-200 bg-white p-3 rounded-r-lg">
                     <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Resposta do Proprietário</p>
                     <p className="text-gray-600 text-sm">{review.resposta}</p>
                   </div>
                 )}
-                {isOwner && !review.resposta && (
+
+                {/* --- ✅ BOTÃO "RESPONDER" CORRIGIDO --- */}
+                {/* Agora compara 'user.profile_id' com 'pool.dono' */}
+                {isLocador && user.profile_id === pool.dono && !review.resposta && (
                   <div className="mt-4 pt-4 border-t border-gray-200">
                     {replyingTo === review.id ? (
                       <div className="mt-2">
@@ -353,7 +363,7 @@ function PoolDetail() {
                         </div>
                       </div>
                     ) : (
-                      <button onClick={() => setReplyingTo(review.id)} className="text-blue-600 text-sm font-semibold hover:underline">Responder</button>
+                      <button onClick={() => { setReplyingTo(review.id); setReplyText(''); }} className="text-blue-600 text-sm font-semibold hover:underline">Responder</button>
                     )}
                   </div>
                 )}
@@ -362,6 +372,7 @@ function PoolDetail() {
           </div>
         )}
       </div>
+
     </div>
   );
 }
