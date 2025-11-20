@@ -55,7 +55,21 @@ class UserSerializer(serializers.ModelSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     user = UserSerializer(required=True)
     tipo = serializers.ChoiceField(choices=Profile.TipoUsuario.choices)
-    telefone = serializers.CharField(required=True, allow_blank=False, max_length=20)
+    
+    # --- ✅ Validação de Telefone Único ---
+    telefone = serializers.CharField(
+        required=True, 
+        allow_blank=False, 
+        max_length=20,
+        validators=[
+            validators.UniqueValidator(
+                queryset=Profile.objects.all(),
+                message="Este telefone já está cadastrado em outra conta."
+            )
+        ]
+    )
+    # --------------------------------------
+
     cpf = serializers.CharField(
         required=True, 
         allow_blank=False, 

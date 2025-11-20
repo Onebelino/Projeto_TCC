@@ -65,14 +65,15 @@ function Register() {
     } catch (error) {
       if (error.response) {
         const errorData = error.response.data;
-        if (errorData.data_nascimento) {
-             toast.error(`Erro: ${errorData.data_nascimento[0]}`); 
+        // Tratamento de erros específicos
+        if (errorData.telefone) {
+            toast.error(`Erro no Telefone: ${errorData.telefone[0]}`);
         } else if (errorData.cpf) {
              toast.error(`Erro no CPF: ${errorData.cpf[0]}`);
         } else if (errorData.user && errorData.user.email) {
             toast.error(`Erro: ${errorData.user.email[0]}`);
         } else {
-            toast.error('Erro ao registrar: ' + JSON.stringify(errorData));
+            toast.error('Erro ao registrar. Verifique os dados.');
         }
       } else {
         toast.error('Erro ao registrar.');
@@ -81,13 +82,15 @@ function Register() {
   };
 
   return (
-    // --- ✅ TEMA LIGHT ---
     <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
       <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">Crie sua Conta</h1>
       <form onSubmit={handleRegisterSubmit} className="space-y-4">
         
         <div>
-          <label className="block text-sm font-medium text-gray-700">Nome Completo:</label>
+          {/* ✅ Asterisco Adicionado */}
+          <label className="block text-sm font-medium text-gray-700">
+            Nome Completo: <span className="text-red-500">*</span>
+          </label>
           <input
             type="text" name="nome_completo" value={registerData.nome_completo}
             onChange={handleRegisterChange} required
@@ -96,7 +99,10 @@ function Register() {
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700">Data de Nascimento:</label>
+          {/* ✅ Asterisco Adicionado */}
+          <label className="block text-sm font-medium text-gray-700">
+            Data de Nascimento: <span className="text-red-500">*</span>
+          </label>
           <input
             type="date" name="data_nascimento" value={registerData.data_nascimento}
             onChange={handleRegisterChange} required
@@ -105,7 +111,10 @@ function Register() {
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700">Email:</label>
+          {/* ✅ Asterisco Adicionado */}
+          <label className="block text-sm font-medium text-gray-700">
+            Email: <span className="text-red-500">*</span>
+          </label>
           <input
             type="email" name="email" value={registerData.email}
             onChange={handleRegisterChange} required
@@ -114,7 +123,10 @@ function Register() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Telefone (com DDD):</label>
+          {/* ✅ Asterisco Adicionado */}
+          <label className="block text-sm font-medium text-gray-700">
+            Telefone (com DDD): <span className="text-red-500">*</span>
+          </label>
           <input
             type="text" name="telefone" placeholder="(11) 91234-5678"
             value={registerData.telefone} onChange={handleRegisterChange}
@@ -123,7 +135,10 @@ function Register() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">CPF:</label>
+          {/* ✅ Asterisco Adicionado */}
+          <label className="block text-sm font-medium text-gray-700">
+            CPF: <span className="text-red-500">*</span>
+          </label>
           <input
             type="text" name="cpf" placeholder="123.456.789-00"
             value={registerData.cpf} onChange={handleRegisterChange}
@@ -133,7 +148,10 @@ function Register() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Senha:</label>
+          {/* ✅ Asterisco Adicionado */}
+          <label className="block text-sm font-medium text-gray-700">
+            Senha: <span className="text-red-500">*</span>
+          </label>
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'} name="password" value={registerData.password}
@@ -147,7 +165,10 @@ function Register() {
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700">Confirme a Senha:</label>
+          {/* ✅ Asterisco Adicionado */}
+          <label className="block text-sm font-medium text-gray-700">
+            Confirme a Senha: <span className="text-red-500">*</span>
+          </label>
           <div className="relative">
             <input
               type={showPassword2 ? 'text' : 'password'} name="password2" value={registerData.password2}
@@ -161,7 +182,7 @@ function Register() {
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700">Tipo de Conta:</label>
+          <label className="block text-sm font-medium text-gray-700">Tipo de Conta:<span className="text-red-500">*</span></label>
           <select 
             name="tipo" value={registerData.tipo} onChange={handleRegisterChange}
             className="w-full p-2 mt-1 rounded bg-gray-100 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
@@ -179,7 +200,7 @@ function Register() {
           />
           <label htmlFor="termos" className="text-sm text-gray-700">
             Li e aceito os <Link to="/termos-de-uso" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">termos de uso</Link>.
-          </label>
+          <span className="text-red-500">*</span></label>
         </div>
         
         <button 
