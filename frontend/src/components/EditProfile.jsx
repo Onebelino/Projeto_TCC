@@ -19,7 +19,6 @@ function EditProfile() {
 
   useEffect(() => {
     if (!authToken) return;
-    
     const fetchProfile = async () => {
       setLoading(true);
       try {
@@ -36,7 +35,6 @@ function EditProfile() {
       }
       setLoading(false);
     };
-
     fetchProfile();
   }, [authToken]); 
 
@@ -47,8 +45,41 @@ function EditProfile() {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // --- ✅ 1. NOVA LÓGICA DE CONFIRMAÇÃO PARA SALVAR ---
+  const handleSubmit = (e) => {
+    e.preventDefault(); // Impede o envio direto
+
+    const MsgConfirmacaoSalvar = ({ closeToast }) => (
+      <div className="text-sm">
+        <p className="font-bold mb-2 text-gray-800">Salvar alterações?</p>
+        <p className="text-gray-600 mb-3">Seus dados de perfil serão atualizados.</p>
+        <div className="flex gap-2 justify-end">
+          <button 
+            onClick={() => confirmSave(closeToast)}
+            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-xs font-bold"
+          >
+            Sim, Salvar
+          </button>
+          <button 
+            onClick={closeToast}
+            className="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400 text-xs font-bold"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    );
+
+    toast(<MsgConfirmacaoSalvar />, { 
+      position: "top-center",
+      autoClose: false,
+      closeOnClick: false,
+      draggable: false,
+      icon: "💾"
+    });
+  };
+
+  const confirmSave = async (closeToast) => {
     try {
       const headers = { 'Authorization': `Bearer ${authToken}` };
       const dataToSubmit = {
@@ -57,6 +88,8 @@ function EditProfile() {
       };
 
       await axios.patch('http://127.0.0.1:8000/api/profile/', dataToSubmit, { headers });
+      
+      closeToast();
       toast.success('Perfil atualizado com sucesso! (O nome na Navbar mudará no próximo login)');
 
     } catch (error) {
@@ -64,24 +97,50 @@ function EditProfile() {
       toast.error(`Erro ao salvar: ${error.response?.data || error.message}`);
     }
   };
+  // -----------------------------------------------------
 
-  const handleDeleteAccount = async () => {
-    if (!window.confirm("ATENÇÃO!\nVocê tem certeza que quer excluir sua conta?\n\nTODOS os seus dados, piscinas e reservas serão permanentemente apagados. Esta ação NÃO pode ser desfeita.")) {
-      return;
-    }
-    
+  // --- Lógica de Exclusão de Conta (Mantida do passo anterior) ---
+  const handleDeleteAccount = () => {
+    const MsgConfirmacaoConta = ({ closeToast }) => (
+      <div className="text-sm">
+        <p className="font-bold mb-2 text-red-700">ATENÇÃO: EXCLUIR CONTA?</p>
+        <p className="text-gray-700 mb-3">
+          Todos os seus dados, piscinas e reservas serão apagados <strong>permanentemente</strong>.
+        </p>
+        <div className="flex gap-2 justify-end">
+          <button 
+            onClick={() => confirmDeleteAccount(closeToast)}
+            className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-xs font-bold"
+          >
+            Confirmar Exclusão
+          </button>
+          <button 
+            onClick={closeToast}
+            className="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400 text-xs font-bold"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    );
+
+    toast(<MsgConfirmacaoConta />, { 
+      position: "top-center", autoClose: false, closeOnClick: false, draggable: false, icon: "⚠️"
+    });
+  };
+
+  const confirmDeleteAccount = async (closeToast) => {
     try {
       const headers = { 'Authorization': `Bearer ${authToken}` };
       await axios.delete('http://127.0.0.1:8000/api/profile/delete/', { headers });
-      toast.success('Conta excluída com sucesso.');
-      logoutUser(); 
-      
+      closeToast();
+      toast.success('Conta excluída.');
+      setTimeout(() => logoutUser(), 1500);
     } catch (error) {
       console.error("Erro ao excluir conta:", error);
-      toast.error(`Erro ao excluir conta: ${error.response?.data || error.message}`);
+      toast.error(`Erro ao excluir: ${error.response?.data || error.message}`);
     }
   };
-
 
   if (loading) {
     return (
@@ -92,7 +151,6 @@ function EditProfile() {
   }
 
   return (
-    // --- ✅ TEMA LIGHT ---
     <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
       <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">Editar Meu Perfil</h1>
       <form onSubmit={handleSubmit} className="space-y-4">

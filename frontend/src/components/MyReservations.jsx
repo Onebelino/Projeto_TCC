@@ -29,11 +29,39 @@ function MyReservations() {
     }
   }, [authToken]);
 
-  const handleCancelReserva = async (reservaId) => {
-    if (!window.confirm("Você tem certeza que quer cancelar esta reserva?")) {
-      return;
-    }
+  // --- ✅ 3. NOVA LÓGICA DE CONFIRMAÇÃO PARA CANCELAR ---
+  const handleCancelReserva = (reservaId) => {
+    const MsgConfirmacaoCancelamento = ({ closeToast }) => (
+      <div className="text-sm">
+        <p className="font-bold mb-2 text-gray-800">Cancelar esta reserva?</p>
+        <p className="text-gray-600 mb-3">O proprietário será notificado do cancelamento.</p>
+        <div className="flex gap-2 justify-end">
+          <button 
+            onClick={() => confirmCancel(reservaId, closeToast)}
+            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs font-bold"
+          >
+            Sim, Cancelar
+          </button>
+          <button 
+            onClick={closeToast}
+            className="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400 text-xs font-bold"
+          >
+            Voltar
+          </button>
+        </div>
+      </div>
+    );
 
+    toast(<MsgConfirmacaoCancelamento />, { 
+      position: "top-center",
+      autoClose: false,
+      closeOnClick: false,
+      draggable: false,
+      icon: "⚠️"
+    });
+  };
+
+  const confirmCancel = async (reservaId, closeToast) => {
     try {
       const headers = { 'Authorization': `Bearer ${authToken}` };
       const body = { "status": "CANCELADA" };
@@ -44,6 +72,8 @@ function MyReservations() {
           reserva.id === reservaId ? { ...reserva, status: 'CANCELADA' } : reserva
         )
       );
+      
+      closeToast();
       toast.success('Reserva cancelada com sucesso!');
 
     } catch (error) {
@@ -51,8 +81,8 @@ function MyReservations() {
       toast.error(`Erro ao cancelar reserva: ${error.response?.data || error.message}`);
     }
   };
+  // ------------------------------------------------------
 
-  // --- Estilos de Status (Light) ---
   const getStatusClasses = (status) => {
     switch (status) {
       case 'CONFIRMADA': return 'text-green-700 bg-green-100 border border-green-200';
@@ -67,7 +97,6 @@ function MyReservations() {
   }
 
   return (
-    // --- ✅ TEMA LIGHT ---
     <div className="w-full max-w-4xl p-8 bg-white rounded-xl shadow-lg border border-gray-100">
       <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Minhas Reservas</h1>
       
@@ -76,7 +105,6 @@ function MyReservations() {
       ) : (
         <div className="space-y-4">
           {reservas.map(reserva => (
-            // Card Claro
             <div key={reserva.id} className="bg-gray-50 p-5 rounded-lg shadow-sm border border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4 hover:shadow-md transition-shadow">
               
               <div className="flex-1">

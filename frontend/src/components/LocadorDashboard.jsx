@@ -29,7 +29,47 @@ function LocadorDashboard() {
     }
   }, [authToken]); 
 
-  const handleUpdateStatus = async (reservaId, novoStatus) => {
+  // --- ✅ 2. NOVA LÓGICA DE CONFIRMAÇÃO PARA ACEITAR/RECUSAR ---
+  const handleUpdateStatus = (reservaId, novoStatus) => {
+    const isConfirming = novoStatus === 'CONFIRMADA';
+    const actionVerb = isConfirming ? 'Aceitar' : 'Recusar';
+    const btnColor = isConfirming ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700';
+
+    const MsgConfirmacaoStatus = ({ closeToast }) => (
+      <div className="text-sm">
+        <p className="font-bold mb-2 text-gray-800">{actionVerb} esta reserva?</p>
+        <p className="text-gray-600 mb-3">
+          {isConfirming 
+            ? "O cliente será notificado da confirmação." 
+            : "A reserva será cancelada e o cliente notificado."}
+        </p>
+        <div className="flex gap-2 justify-end">
+          <button 
+            onClick={() => confirmStatusChange(reservaId, novoStatus, closeToast)}
+            className={`${btnColor} text-white px-3 py-1 rounded text-xs font-bold`}
+          >
+            Sim, {actionVerb}
+          </button>
+          <button 
+            onClick={closeToast}
+            className="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400 text-xs font-bold"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    );
+
+    toast(<MsgConfirmacaoStatus />, { 
+      position: "top-center",
+      autoClose: false,
+      closeOnClick: false,
+      draggable: false,
+      icon: isConfirming ? "✅" : "🚫"
+    });
+  };
+
+  const confirmStatusChange = async (reservaId, novoStatus, closeToast) => {
     try {
       const headers = { 'Authorization': `Bearer ${authToken}` };
       const body = { "status": novoStatus };
@@ -41,13 +81,16 @@ function LocadorDashboard() {
           reserva.id === reservaId ? { ...reserva, status: novoStatus } : reserva
         )
       );
-      toast.success(`Reserva ${novoStatus.toLowerCase()}!`);
+      
+      closeToast();
+      toast.success(`Reserva ${novoStatus === 'CONFIRMADA' ? 'aceita' : 'recusada'} com sucesso!`);
 
     } catch (error) {
       console.error(`Erro ao ${novoStatus} reserva:`, error);
       toast.error(`Erro ao atualizar reserva: ${error.response?.data || error.message}`);
     }
   };
+  // -----------------------------------------------------------
 
   // --- Estilos de Status (Light) ---
   const getStatusClasses = (status) => {
@@ -64,7 +107,6 @@ function LocadorDashboard() {
   }
 
   return (
-    // --- ✅ TEMA LIGHT ---
     <div className="w-full max-w-5xl p-8 bg-white rounded-xl shadow-lg border border-gray-100">
       <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Painel de Gerenciamento</h1>
       
@@ -73,9 +115,7 @@ function LocadorDashboard() {
       ) : (
         <div className="space-y-4">
           {reservas.map(reserva => (
-            // Card Claro
             <div key={reserva.id} className="bg-gray-50 p-5 rounded-lg shadow-sm border border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4 hover:shadow-md transition-shadow">
-              
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-blue-600">{reserva.piscina_titulo}</h3>
                 <p className="text-gray-700">
@@ -113,7 +153,6 @@ function LocadorDashboard() {
                   </div>
                 )}
               </div>
-
             </div>
           ))}
         </div>

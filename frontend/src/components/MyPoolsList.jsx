@@ -11,6 +11,7 @@ function MyPoolsList() {
   const [loading, setLoading] = useState(true);
   const { authToken } = useContext(AuthContext);
 
+  // ... (fetchMyPools e useEffect permanecem iguais) ...
   const fetchMyPools = async () => {
     setLoading(true);
     try {
@@ -30,28 +31,65 @@ function MyPoolsList() {
     }
   }, [authToken]);
 
-  const handleDelete = async (poolId) => {
-    if (!window.confirm("Você tem certeza que quer excluir esta piscina? Esta ação não pode ser desfeita.")) {
-      return;
-    }
+  // --- ✅ NOVA LÓGICA DE EXCLUSÃO COM TOASTIFY ---
+  const handleDelete = (poolId) => {
+    // Criamos um componentezinho para o conteúdo do Toast
+    const MsgConfirmacao = ({ closeToast }) => (
+      <div className="text-sm">
+        <p className="font-bold mb-2 text-gray-800">Tem certeza que deseja excluir?</p>
+        <p className="text-gray-600 mb-3">Essa ação não pode ser desfeita.</p>
+        <div className="flex gap-2 justify-end">
+          <button 
+            onClick={() => confirmDelete(poolId, closeToast)}
+            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs font-bold"
+          >
+            Sim, Excluir
+          </button>
+          <button 
+            onClick={closeToast}
+            className="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400 text-xs font-bold"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    );
 
+    // Exibe o toast customizado. 
+    // 'autoClose: false' faz ele ficar na tela até alguém clicar.
+    toast(<MsgConfirmacao />, { 
+      position: "top-center",
+      autoClose: false,
+      closeOnClick: false,
+      draggable: false
+    });
+  };
+
+  // Função que realmente deleta (chamada pelo botão "Sim" do toast)
+  const confirmDelete = async (poolId, closeToast) => {
     try {
       const headers = { 'Authorization': `Bearer ${authToken}` };
       await axios.delete(`http://127.0.0.1:8000/api/piscinas/${poolId}/`, { headers });
+      
       setMyPools(myPools.filter(pool => pool.id !== poolId));
+      
+      // Fecha o toast de pergunta e abre um de sucesso
+      closeToast(); 
       toast.success('Piscina excluída com sucesso!');
+      
     } catch (error) {
       console.error("Erro ao excluir piscina:", error);
       toast.error(`Erro ao excluir: ${error.response?.data || error.message}`);
     }
   };
+  // ------------------------------------------------
 
   if (loading) {
     return <div className="text-gray-600 text-center p-10">Carregando suas piscinas...</div>;
   }
 
   return (
-    // --- ✅ TEMA LIGHT ---
+    // ... (O JSX do retorno permanece igual) ...
     <div className="w-full max-w-5xl p-8 bg-white rounded-xl shadow-lg border border-gray-100">
       <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Minhas Piscinas Cadastradas</h1>
       
@@ -63,7 +101,6 @@ function MyPoolsList() {
             const coverImage = pool.imagens && pool.imagens.length > 0 ? pool.imagens[0].imagem : 'https://placehold.co/192x128/f3f4f6/9ca3af?text=Sem+Foto';
             
             return (
-              // Card Claro
               <div key={pool.id} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col md:flex-row items-center gap-4 hover:shadow-md transition-shadow">
                 
                 <img 
@@ -85,6 +122,7 @@ function MyPoolsList() {
                   >
                     Editar
                   </Link>
+                  {/* Aqui chamamos o novo handleDelete */}
                   <button 
                     onClick={() => handleDelete(pool.id)}
                     className="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors shadow-sm"
