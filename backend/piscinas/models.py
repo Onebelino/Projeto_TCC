@@ -21,7 +21,6 @@ class Piscina(models.Model):
     estado = models.CharField(max_length=2, choices=ESTADOS_BRASILEIROS, blank=True, null=True)
     endereco = models.CharField(max_length=255)
     preco_diaria = models.DecimalField(max_digits=10, decimal_places=2, default=100.00)
-    # (O campo 'imagem' (singular) não existe mais aqui)
 
     def __str__(self):
         return f'{self.titulo} - {self.cidade}/{self.estado}'

@@ -8,11 +8,8 @@ class Avaliacao(models.Model):
     piscina = models.ForeignKey(Piscina, on_delete=models.CASCADE, related_name='avaliacoes')
     nota = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     comentario = models.TextField()
-    
-    # --- ✅ NOVO CAMPO ---
     resposta = models.TextField(blank=True, null=True) # A resposta do dono
-    # ---------------------
-    
+
     criado_em = models.DateTimeField(auto_now_add=True)
 
     class Meta:

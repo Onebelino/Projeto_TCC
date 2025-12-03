@@ -159,7 +159,7 @@ function EditProfile() {
           <input type="text" name="nome_completo" value={profileData.nome_completo} onChange={handleChange} required className="w-full p-2 mt-1 rounded bg-gray-100 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Data de Nascimento (Opcional):</label>
+          <label className="block text-sm font-medium text-gray-700">Data de Nascimento:</label>
           <input type="date" name="data_nascimento" value={profileData.data_nascimento} onChange={handleChange} className="w-full p-2 mt-1 rounded bg-gray-100 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500" />
         </div>
         <div>

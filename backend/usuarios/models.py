@@ -17,12 +17,7 @@ class Profile(models.Model):
     )
     
     telefone = models.CharField(max_length=20, blank=True, null=True)
-    
-    # --- ✅ AQUI ESTÁ A SEGURANÇA ---
-    # unique=True impede duplicatas no nível do Banco de Dados
     cpf = models.CharField(max_length=14, blank=True, null=True, unique=True)
-    # -------------------------------
-
     nome_completo = models.CharField(max_length=255, blank=True, null=True)
     data_nascimento = models.DateField(blank=True, null=True)
 

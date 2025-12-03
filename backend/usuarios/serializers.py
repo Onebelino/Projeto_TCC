@@ -5,12 +5,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import validators
 from datetime import date
 
-# --- ✅ ATUALIZAÇÃO AQUI ---
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    """
-    Este serializer customizado adiciona o 'display_name' E
-    o 'profile_id' ao token JWT.
-    """
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
@@ -18,7 +14,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             profile = user.profile
             token['profile_tipo'] = profile.tipo
             token['display_name'] = profile.nome_completo or user.username
-            token['profile_id'] = profile.id # <-- A LINHA QUE FALTAVA
+            token['profile_id'] = profile.id
             
         except Profile.DoesNotExist:
             token['profile_tipo'] = None
